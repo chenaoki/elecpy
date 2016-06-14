@@ -1,6 +1,7 @@
 import numpy as np
 from chainer import cuda
 xp = cuda.cupy
+import scipy.sparse as sp
 
 def getPDEMatrix(h, w, xx, yy, ds):
 
@@ -8,11 +9,11 @@ def getPDEMatrix(h, w, xx, yy, ds):
   size_all  = (h+2)*(w+2)
 
   def ivec_real( y, x ):
-    _x = x if x >=0 else h+x 
+    _x = x if x >=0 else w+x 
     _y = y if y >=0 else h+y 
     return w*_y + _x
   def ivec_all( y, x ):
-    _x = x if x >=0 else (h+2)+x 
+    _x = x if x >=0 else (w+2)+x 
     _y = y if y >=0 else (h+2)+y 
     return (w+2)*_y + _x
 
