@@ -2,3 +2,6 @@
 *.swp
 *.txt
 archive
+*.npy
+result/*
+.ipynb_checkpoints*
