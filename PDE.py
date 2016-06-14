@@ -120,8 +120,14 @@ class PDE(object):
     error = 1e12
     cnt = 0
     while error > tol:
-       x_ = y_ - xp.dot(self.R, x_old) / self.D[:, np.newaxis]
-       error = norm_xp(x_ - x_old) / norm_xp(x_)
+       x_ = ( y_ - xp.dot(self.R, x_old) ) / self.D[:, np.newaxis]
+       n = norm_xp(x_)
+       """
+       if n < 1:
+         print "broken loop with norm {0}".format(n)
+         break
+       """
+       error = norm_xp(x_ - x_old) / n
        x_old = x_
        cnt += 1
     return cnt, x_.reshape((self.h,self.w))
@@ -132,7 +138,7 @@ if __name__ == '__main__':
   from matplotlib import animation
 
   fig = plt.figure(figsize=(5,5))
-  im = plt.imshow(np.zeros((250,250),dtype=xp.float32), vmin = -10., vmax = 10., interpolation='none')
+  im = plt.imshow(np.zeros((250,250),dtype=xp.float32), vmin = -10., vmax = 10., interpolation='nearest')
   plt.axis('off')
 
   def sim():
@@ -141,32 +147,32 @@ if __name__ == '__main__':
 
     x = xp.ones((h,w), dtype=xp.float32)
     y = xp.zeros((h,w), dtype=xp.float32)
-    y[h/2, w/2] = 10.0
+    y[h/4:3*h/4, w/4:3*w/4] = 1.0
 
+    #A, R, D = getPDEMatrix(h, w, 1.0, 1.0, 1.0) 
     A, R, D = getPDEMatrix(h,w,3.75e-3, 3.75e-3, 1.5e-2) 
 
-    print 'A',A.shape
-    print 'R',R.shape
-    print 'D',D.shape
-    print 'x',x.shape
-    print 'y',y.shape
+    #np.save( 'A', A.get() )
+    #np.save( 'R', R.get() )
+    #np.save( 'D', D.get() )
+    #np.save( 'x', x.get() )
+    #np.save( 'y', y.get() )
 
-    ''' 
     x_ = x.flatten()[:,np.newaxis]
     y_ = y.flatten()[:,np.newaxis]
 
     for i in range(1000):
       print 'loop@{0}'.format(i)
-      x_ = ( y_ - xp.dot(R, x_) ) / D
-      print x_.shape
-
+      x_ = ( y_ - xp.dot(R, x_ )) / D[:, np.newaxis]
       yield i, x_.get().reshape((h,w))
     
     ''' 
 
     pde_solver = PDE( h, w, 3.75e-3, 3.75e-3, 1.5e-2) 
-    cnt, x = pde_solver.solve(x, y, tol=1e-2)
+    cnt, x = pde_solver.solve(x, y, tol=1e-3)
     yield cnt, x.get()
+    ''' 
+
 
   def draw(data):
     i, img = tuple(data)

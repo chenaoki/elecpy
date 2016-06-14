@@ -8,6 +8,7 @@ from chainer.functions.connection.convolution_2d import convolution_2d
 xp = cuda.cupy
 
 from const import const_d
+import os
 
 params = [ 'v',  'dt',  'h',  'j',  'm',  'nai',  'naiss',  'cai',  'caiss',  'ki',  'kiss',  'ltypeCzero',  'ltypeCone',  'ltypeCtwo',  'ltypeCthree',  'ltypeIVf',  'ltypeIVs',  'ltypeO',  'fcasc',  'fmode0',  'ical',  'ilcana',  'ilcak',  'irel',  'itr',  'b',  'g',  'xr',  'xs1',  'xs2',  'inacass',  'nsr',  'ryrCone',  'ryrCtwo',  'ryrCthree',  'ryrCfour',  'ryrOone',  'ryrIone',  'ryrItwo',  'ryrIthree',  'ryrIfour',  'ryrIfive',  'csqn',  'jsr', 'it', 'st']
 
@@ -23,6 +24,16 @@ elemwise = open('ElementwiseKernel.c').read().format(**const_d)
 def createCellState(shape):
   state = [ xp.asarray( np.ones(shape, dtype=np.float32) * const_d[param+'_'] ) for param in params ]
   return state
+
+def loadCellState(path):
+  state = [ xp.asarray( np.load(path+'/'+param+'.npy')) for param in params ]
+  return state
+
+def saveCellState(path, state):
+  os.system('mkdir '+path)
+  for i, param in enumerate(params):
+    np.save(path+'/'+param, state[i].get()) 
+  pass
 
 class luorudy(Function):
   def forward(self,x):
