@@ -5,3 +5,5 @@ archive
 *.npy
 result/*
 .ipynb_checkpoints*
+*.sh
+*.pickle

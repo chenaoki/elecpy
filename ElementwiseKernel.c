@@ -1,15 +1,26 @@
 T _maskPosi; 
 T _maskNega; 
 
+_v = v;
+
 // voltage trapping to avoid error
-_maskPosi =  ( v < 0.00001 ) * 1;
-_maskPosi *= ( v >= 0 ) * 1;
+_maskPosi =  ( _v < 0.00001 ) * 1;
+_maskPosi *= ( _v >= 0 ) * 1;
 _maskNega = ( _maskPosi == 0 ) * 1;
-_v = _maskPosi * 0.00001 + _maskNega * v;
+_v = _maskPosi * 0.00001 + _maskNega * _v;
 _maskPosi =  ( _v > -0.00001 ) * 1;
 _maskPosi *= ( _v <= 0 ) * 1;
 _maskNega = ( _maskPosi == 0 ) * 1;
 _v = _maskPosi * -0.00001 + _maskNega * _v;
+
+_maskPosi =  ( _v < -30.0+0.001 ) * 1;
+_maskPosi *= ( _v >= -30.0 ) * 1;
+_maskNega = ( _maskPosi == 0 ) * 1;
+_v = _maskPosi * (-30.0+0.001)+ _maskNega * _v;
+_maskPosi =  ( _v > -30.0 -0.001 ) * 1;
+_maskPosi *= ( _v <= -30.0 ) * 1;
+_maskNega = ( _maskPosi == 0 ) * 1;
+_v = _maskPosi * (-30.0-0.001) + _maskNega * _v;
 
 // comp_ina ()
 T _ena = (({R_}*{temp_})/{frdy_})*log({nao_}/nai);
