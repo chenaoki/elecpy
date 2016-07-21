@@ -7,3 +7,4 @@ result/*
 .ipynb_checkpoints*
 *.sh
 *.pickle
+*.bat 

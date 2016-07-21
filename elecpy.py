@@ -89,7 +89,7 @@ def sim( ):
   pde_vmem   = PDE( im_h, im_w, sigma_l_i, sigma_t_i, ds )
   print 'done'
 
-  os.system('mkdir {0}'.format(savepath))
+  if not os.path.isdir(savepath) : os.mkdir(savepath)
 
   if flag_restart:
     pfx = '_{0:0>4}'.format(time_restart) if time_restart > 0 else ''

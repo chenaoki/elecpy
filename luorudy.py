@@ -10,7 +10,7 @@ xp = cuda.cupy
 from const import const_d
 import os
 
-params = [ 'v',  'dt',  'h',  'j',  'm',  'nai',  'naiss',  'cai',  'caiss',  'ki',  'kiss',  'ltypeCzero',  'ltypeCone',  'ltypeCtwo',  'ltypeCthree',  'ltypeIVf',  'ltypeIVs',  'ltypeO',  'fcasc',  'fmode0',  'ical',  'ilcana',  'ilcak',  'irel',  'itr',  'b',  'g',  'xr',  'xs1',  'xs2',  'inacass',  'nsr',  'ryrCone',  'ryrCtwo',  'ryrCthree',  'ryrCfour',  'ryrOone',  'ryrIone',  'ryrItwo',  'ryrIthree',  'ryrIfour',  'ryrIfive',  'csqn',  'jsr', 'it', 'st']
+params = [ 'v', 'temp', 'dt',  'h',  'j',  'm',  'nai',  'naiss',  'cai',  'caiss',  'ki',  'kiss',  'ltypeCzero',  'ltypeCone',  'ltypeCtwo',  'ltypeCthree',  'ltypeIVf',  'ltypeIVs',  'ltypeO',  'fcasc',  'fmode0',  'ical',  'ilcana',  'ilcak',  'irel',  'itr',  'b',  'g',  'xr',  'xs1',  'xs2',  'inacass',  'nsr',  'ryrCone',  'ryrCtwo',  'ryrCthree',  'ryrCfour',  'ryrOone',  'ryrIone',  'ryrItwo',  'ryrIthree',  'ryrIfour',  'ryrIfive',  'csqn',  'jsr', 'it', 'st']
 
 string_args = ''
 string_rets = ''
@@ -30,7 +30,7 @@ def loadCellState(path):
   return state
 
 def saveCellState(path, state):
-  os.system('mkdir '+path)
+  if not os.path.isdir(path) : os.mkdir(path)
   for i, param in enumerate(params):
     np.save(path+'/'+param, state[i].get()) 
   pass

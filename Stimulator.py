@@ -118,6 +118,7 @@ if __name__ == '__main__':
   im_h = 120
   im_w = 180
 
+  """
   stim_params = [
       {  
         "name" : "edge_L",
@@ -132,7 +133,7 @@ if __name__ == '__main__':
       {  
         "name" : "area_B",
         "shape" : (im_h, im_w),
-        "size" : im_h / 2,
+        "size" : im_h / 2 + 10,
         "start" : 550.0,
         "interval" : 300.0,
         "duration" : 1.0,
@@ -148,6 +149,65 @@ if __name__ == '__main__':
         "amplitude" : 20.0,
       }
   ]
+  # burst pacing
+  stim_params = [
+      {  
+        "name" : "edge_L",
+        "shape" : (im_h, im_w),
+        "size" : 6,
+        "start" : 0.0,
+        "interval" : 200.0,
+        "duration" : 3.0,
+        "amplitude" : 35.0,
+        "train" : 10
+      },
+      {  
+        "name" : "area_B",
+        "shape" : (im_h, im_w),
+        "size" : im_h / 2,
+        "start" : 220.0,
+        "interval" : 215.0,
+        "duration" : 1.0,
+        "amplitude" : 20.0,
+        "train" : 10
+      },
+  ]
+  stim_params = [
+      {  
+        "name" : "edge_L",
+        "shape" : (im_h, im_w),
+        "size" : 6,
+        "start" : 0.0,
+        "interval" : 200.0,
+        "duration" : 3.0,
+        "amplitude" : 35.0,
+        "train" : 10
+      }
+  ]
+  """
+  stim_params = [
+    {  
+      "name" : "edge_L",
+      "shape" : (im_h, im_w),
+      "size" : 6,
+      "start" : 0.0,
+      "interval" : 250.0,
+      "duration" : 3.0,
+      "amplitude" : 35.0,
+      "train" : 1
+    },
+
+    {
+        "name" : "point",
+        "shape" : (im_h, im_w),
+        "size" : (im_w/2+1, im_h/2+1, 5),
+        "start" : 100.0,
+        "interval" : 100.0,
+        "duration" : 5.0,
+        "amplitude" : 50.0,
+    }
+  ]
+
   with open ('stim_params.pickle', 'w' ) as f : pickle.dump(stim_params, f)
 
   stims = []
@@ -164,7 +224,7 @@ if __name__ == '__main__':
 
   def sim():
     t = 0.0
-    t_end = 600.0
+    t_end = 2000.0
     dt =10
     i_ext_e = np.zeros((im_h,im_w),dtype=np.float32)
     while t < t_end:
@@ -173,6 +233,7 @@ if __name__ == '__main__':
         i_ext_e += s.get_current(t)
       print t
       yield i_ext_e
+      np.save('./result/stim_pattern/{0:0>4}'.format(int(t)), i_ext_e)
       t += dt
     exit()
 
