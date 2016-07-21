@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
   import matplotlib.pylab as plt
   from matplotlib import animation
-  import pickle
+  import json
 
   im_h = 120
   im_w = 180
@@ -208,7 +208,7 @@ if __name__ == '__main__':
     }
   ]
 
-  with open ('stim_params.pickle', 'w' ) as f : pickle.dump(stim_params, f)
+  with open ('stim_params.json', 'w' ) as f : json.dump(stim_params, f, indent=4)
 
   stims = []
   for param in stim_params:

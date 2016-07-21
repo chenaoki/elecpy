@@ -1,0 +1,31 @@
+[
+    {
+        "start": 0.0, 
+        "shape": [
+            120, 
+            180
+        ], 
+        "train": 1, 
+        "name": "edge_L", 
+        "amplitude": 35.0, 
+        "duration": 3.0, 
+        "interval": 250.0, 
+        "size": 6
+    }, 
+    {
+        "name": "point", 
+        "interval": 100.0, 
+        "start": 100.0, 
+        "shape": [
+            120, 
+            180
+        ], 
+        "amplitude": 50.0, 
+        "duration": 5.0, 
+        "size": [
+            91, 
+            61, 
+            5
+        ]
+    }
+]

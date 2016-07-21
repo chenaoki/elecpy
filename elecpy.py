@@ -2,7 +2,7 @@
 
 import os
 from optparse import OptionParser
-import pickle
+import json
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -33,7 +33,7 @@ time_restart     = -1  # time_restart [ms].
 time_end       = 1000
 savepath       = './data'
 srcpath        = './data'
-stim_param_file = './stim_params.pickle'
+stim_param_file = './stim_params.json'
 debug = False
 isolated = False
 
@@ -59,11 +59,13 @@ def sim( ):
 
   # Stimulators
   stims = []
-  with open (stim_param_file,'r') as f : stim_params = pickle.load(f)
+  with open (stim_param_file,'r') as f : stim_params = json.load(f)
+  print stim_params
   for param in stim_params:
     print param
     stim = Stimulator(**param)
-    assert stim.shape == (im_h, im_w)
+    print stim.shape, im_h, im_w
+    assert tuple(stim.shape) == (im_h, im_w)
     stims.append(stim)
     
   log_interval = 1 if debug else 1000
@@ -177,7 +179,7 @@ def sim( ):
   np.save('{0}/phie'.format(savepath), phie) 
   np.save('{0}/vmem'.format(savepath), vmem) 
   saveCellState('{0}/cell'.format(savepath), cell_state)
-  with open('{0}/stims.pickle'.format(savepath), 'w') as f : pickle.dump(stims, f)
+  with open('{0}/stims.json'.format(savepath), 'w') as f : json.dump(stims, f, indent=4)
   print "elecpy done"
   exit()
 
@@ -226,7 +228,7 @@ if __name__ == '__main__':
   parser.add_option(
       '-p','--stim_param_file', 
       dest='stim_param_file', action='store', type='string',
-      help="Pickle file containing stimlation parameters")
+      help="json file containing stimlation parameters")
 
   (options, args) = parser.parse_args()
   isolated        = True                    if options.isolated        else False
@@ -236,7 +238,7 @@ if __name__ == '__main__':
   time_end        = options.time_end        if options.time_end        else 1000
   savepath        = options.savepath        if options.savepath        else './result/data'
   srcpath         = options.srcpath         if options.srcpath         else './result/data'
-  stim_param_file = options.stim_param_file if options.stim_param_file else './stim_params.pickle'
+  stim_param_file = options.stim_param_file if options.stim_param_file else './stim_params.json'
 
   ani = animation.FuncAnimation(fig, draw, sim, blit=False, interval=200, repeat=False)
   plt.show()
