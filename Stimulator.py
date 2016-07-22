@@ -9,7 +9,7 @@ class Stimulator(object):
     self.size         = size
     self.interval     = interval
     self.duration     = duration
-    self.amplitude    = amplitude
+    self.amplitude    = amplitude  # (uA/cm^2)
     self.is_anode     = is_anode
     self.start        = start
     self.train        = train
@@ -115,104 +115,14 @@ if __name__ == '__main__':
   from matplotlib import animation
   import json
 
-  im_h = 120
-  im_w = 180
-
-  """
-  stim_params = [
-      {  
-        "name" : "edge_L",
-        "shape" : (im_h, im_w),
-        "size" : 6,
-        "start" : 0.0,
-        "interval" : 400.0,
-        "duration" : 3.0,
-        "amplitude" : 35.0,
-        "train" : 3
-      },
-      {  
-        "name" : "area_B",
-        "shape" : (im_h, im_w),
-        "size" : im_h / 2 + 10,
-        "start" : 550.0,
-        "interval" : 300.0,
-        "duration" : 1.0,
-        "amplitude" : 20.0,
-      },
-      {  
-        "name" : "point",
-        "shape" : (im_h, im_w),
-        "size" : (im_h/2+1, im_w/2+1, 2),
-        "start" : 1000.0,
-        "interval" : 100.0,
-        "duration" : 1.0,
-        "amplitude" : 20.0,
-      }
-  ]
-  # burst pacing
-  stim_params = [
-      {  
-        "name" : "edge_L",
-        "shape" : (im_h, im_w),
-        "size" : 6,
-        "start" : 0.0,
-        "interval" : 200.0,
-        "duration" : 3.0,
-        "amplitude" : 35.0,
-        "train" : 10
-      },
-      {  
-        "name" : "area_B",
-        "shape" : (im_h, im_w),
-        "size" : im_h / 2,
-        "start" : 220.0,
-        "interval" : 215.0,
-        "duration" : 1.0,
-        "amplitude" : 20.0,
-        "train" : 10
-      },
-  ]
-  stim_params = [
-      {  
-        "name" : "edge_L",
-        "shape" : (im_h, im_w),
-        "size" : 6,
-        "start" : 0.0,
-        "interval" : 200.0,
-        "duration" : 3.0,
-        "amplitude" : 35.0,
-        "train" : 10
-      }
-  ]
-  """
-  stim_params = [
-    {  
-      "name" : "edge_L",
-      "shape" : (im_h, im_w),
-      "size" : 6,
-      "start" : 0.0,
-      "interval" : 250.0,
-      "duration" : 3.0,
-      "amplitude" : 35.0,
-      "train" : 1
-    },
-
-    {
-        "name" : "point",
-        "shape" : (im_h, im_w),
-        "size" : (im_w/2+1, im_h/2+1, 5),
-        "start" : 100.0,
-        "interval" : 100.0,
-        "duration" : 5.0,
-        "amplitude" : 50.0,
-    }
-  ]
-
-  with open ('stim_params.json', 'w' ) as f : json.dump(stim_params, f, indent=4)
-
+  with open ('./sim_params.json','r') as f : sim_params = json.load(f)
+  stim_params = sim_params['stimulation']
+  assert len(stim_params) > 0
   stims = []
   for param in stim_params:
     stims.append(Stimulator(**param))
+
+  im_h, im_w = stims[0].shape
 
   fig = plt.figure(figsize=(10,10))
   im = plt.imshow(
