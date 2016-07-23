@@ -42,13 +42,13 @@ parser.add_option(
 
 (options, args) = parser.parse_args()
 print options.param_file
+if not os.path.isdir(options.savepath) : os.mkdir(options.savepath)
 
 with open (options.param_file,'r') as f : sim_params = json.load(f)
 with open('{0}/sim_params.json'.format(options.savepath), 'w') as f : json.dump(sim_params, f, indent=4)
 im_h         = sim_params['geometory']['height']
 im_w         = sim_params['geometory']['width']
 ds           = sim_params['geometory']['ds'] # Spatial discretization step (cm)
-Sv           = sim_params['geometory']['Sv'] # Surface-to-volume ratio (cm^-1) 
 udt          = sim_params['time']['udt']     # Universal time step (ms)
 cnt_log      = sim_params['time']['cnt_log'] # num of udt for logging
 time_end     = sim_params['time']['end']
@@ -56,13 +56,14 @@ stims = []
 for param in sim_params['stimulation']:
   stim = Stimulator(**param)
   assert tuple(stim.shape) == (im_h, im_w)
-  stims.append(stim)
+  stims.append(stim)  
 
-Cm           = 1.0                       # Membrane capacitance (uF/cm^2)
-sigma_l_i    = 3.75e-3                   # (mS/cm)
-sigma_t_i    = 3.75e-4                   # (mS/cm)
-sigma_l_e    = 3.75e-3                   # (mS/cm) 
-sigma_t_e    = 2.14e-3                   # (mS/cm)
+Sv           = 1400                  # Surface-to-volume ratio (cm^-1) 
+Cm           = 1.0                   # Membrane capacitance (uF/cm^2)
+sigma_l_i    = 1.74                  # (mS/cm)
+sigma_t_i    = 0.19                  # (mS/cm)
+sigma_l_e    = 6.25                  # (mS/cm) 
+sigma_t_e    = 2.3                   # (mS/cm)
 
 fig = plt.figure(figsize=(10,10))
 im = plt.imshow(
@@ -107,8 +108,6 @@ def sim( ):
   pde_m = PDE( im_h, im_w, sigma_l,   sigma_t,   ds )
   print '...done'
 
-  if not os.path.isdir(options.savepath) : os.mkdir(options.savepath)
-
   while t < time_end:
 
     t = cnt_udt * udt
@@ -117,7 +116,7 @@ def sim( ):
     # Stimulation control
     i_ext_e[:,:] = 0.0
     for s in stims:
-      i_ext_e += s.get_current(t)
+      i_ext_e += s.get_current(t)*Sv
 
     # step.1 cell state transition
     cell_state[lr_params.index('dt')][:,:] = dt 
@@ -134,6 +133,7 @@ def sim( ):
       # step.2 phie 
       rhs_phie = i_ext_e - i_ext_i - pde_i.forward(vmem) 
       pde_cnt, phie = pde_m.solve(phie, rhs_phie)
+      phie -= phie[0,0]
 
       # step.3 vmem
       rhs_vmem = pde_i.forward(vmem)
@@ -163,11 +163,11 @@ def sim( ):
 
     # Time step control
     if run_udt:
-      if pde_cnt < 10 and cnt_udt % 5 == 0:
+      if pde_cnt < 1 and cnt_udt % 5 == 0:
         dstep = 5
         run_udt = False
     else:
-      if pde_cnt > 10:
+      if pde_cnt > 5:
         dstep = 1
         run_udt = True
 
