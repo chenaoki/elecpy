@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     for i in range(V.shape[0]):
       fig = plt.gcf()
-      savepath = files[i].replace('.npy', '.jpg').replace('vmem', 'disp')
+      savepath = files[i].replace('.npy', '.jpg').replace(options.prefix, 'disp_')
       print savepath
       plt.clf()
       plt.imshow(
