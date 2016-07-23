@@ -4,13 +4,11 @@ import numpy as np
 
 class Stimulator(object):
 
-  def __init__(self, shape, size, start, interval, duration, amplitude, is_anode=True, train=1, name="noname"): 
+  def __init__(self, shape, size, start, interval, duration, amplitude, train=1, name="noname"): 
     self.shape        = shape
     self.size         = size
     self.interval     = interval
     self.duration     = duration
-    self.amplitude    = amplitude  # (uA/cm^2)
-    self.is_anode     = is_anode
     self.start        = start
     self.train        = train
     self.name         = name
@@ -18,6 +16,8 @@ class Stimulator(object):
     self._map_off     = np.zeros( self.shape, dtype=np.float32 )
     self._map_anode   = np.zeros( self.shape, dtype=np.float32 )
     self._map_cathode = np.zeros( self.shape, dtype=np.float32 )
+    self.amplitude    = abs(amplitude)  # (uA/cm^2)
+    self.is_anode     = True if amplitude > 0 else False
 
     if self.name == "area_L" : self.set_area_L(self.size) 
     if self.name == "area_R" : self.set_area_R(self.size) 
@@ -45,8 +45,8 @@ class Stimulator(object):
       self._map_on += anode*self.amplitude
       self._map_on += cathode*( -self.amplitude * np.sum(anode)/ float(np.sum(cathode)) ) 
     else:
-      self._map_on += cathode*self.amplitude
-      self._map_on += anode*( -self.amplitude * np.sum(cathode)/ float(np.sum(anode)) ) 
+      self._map_on += cathode*-self.amplitude
+      self._map_on += anode*( self.amplitude * np.sum(cathode)/ float(np.sum(anode)) ) 
 
   def set_area_L(self, border):
     assert border > 0 and border < self.shape[1]
@@ -101,12 +101,12 @@ class Stimulator(object):
     assert y >= rad and y + rad <= self.shape[1]
     if self.is_anode:
       self._map_anode[x-rad:x+rad,y-rad:y+rad] = 1.0
-      self._map_cathode[0,:] = 1.0
-      self._map_cathode[-1,:] = 1.0
+      self._map_cathode[:, 0] = 1.0
+      self._map_cathode[:, -1] = 1.0
     else:
       self._map_cathode[x-rad:x+rad,y-rad:y+rad] = 1.0
-      self._map_anode[0,:] = 1.0
-      self._map_anode[-1,:] = 1.0
+      self._map_anode[:, 0] = 1.0
+      self._map_anode[:, -1] = 1.0
     self.set_location()
 
 if __name__ == '__main__':
@@ -127,7 +127,7 @@ if __name__ == '__main__':
   fig = plt.figure(figsize=(10,10))
   im = plt.imshow(
       np.zeros((im_h,im_w),dtype=np.float32), 
-      vmin = -100.0, vmax = 100.0, 
+      vmin = -200.0, vmax = 200.0, 
       cmap='hot', 
       interpolation='nearest')
   plt.axis('off')
@@ -143,7 +143,7 @@ if __name__ == '__main__':
         i_ext_e += s.get_current(t)
       print t
       yield i_ext_e
-      np.save('./result/stim_pattern/{0:0>4}'.format(int(t)), i_ext_e)
+      np.save('./result/stim_pattern/out_{0:0>4}'.format(int(t)), i_ext_e)
       t += dt
     exit()
 
