@@ -9,3 +9,4 @@ result/*
 *.pickle
 *.bat 
 sim_params.json 
+*.json 
