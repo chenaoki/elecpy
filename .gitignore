@@ -10,3 +10,4 @@ result/*
 *.bat 
 sim_params.json 
 *.json 
+stim_pattern*
