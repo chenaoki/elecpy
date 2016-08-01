@@ -65,7 +65,7 @@ sigma_t_i    = 0.19                  # (mS/cm)
 sigma_l_e    = 6.25                  # (mS/cm) 
 sigma_t_e    = 2.3                   # (mS/cm)
 
-fig = plt.figure(figsize=(10,10))
+fig = plt.figure(figsize=(5,5))
 im = plt.imshow(
     np.zeros((im_h,im_w),dtype=np.float32), 
     vmin = -100.0, vmax = 100.0, 
@@ -80,6 +80,8 @@ def sim( ):
   cnt_udt   = 0                            # Count of udt
   dstep     = 1                            # Time step (# of udt) 
   run_udt   = True                         # Flag of running sim in udt
+  flg_st    = False
+  cnt_st_off = 0
 
   # Stimulators    
   print "Allocating data...",
@@ -115,8 +117,10 @@ def sim( ):
 
     # Stimulation control
     i_ext_e[:,:] = 0.0
+    flg_st_temp = False
     for s in stims:
       i_ext_e += s.get_current(t)*Sv
+      flg_st_temp = flg_st_temp or s.get_flag(t)
 
     # step.1 cell state transition
     cell_state[lr_params.index('dt')][:,:] = dt 
@@ -161,10 +165,20 @@ def sim( ):
       if flg is True:
         break
 
+      # Stim off count
+      if flg_st_temp is False:
+        if flg_st is True:
+          cnt_st_off = 0
+        else:
+          cnt_st_off += 1
+      flg_st = flg_st_temp
+      print '+' if flg_st else '-',
+      print '+' if run_udt else '-'
+
     # Time step control
     if run_udt:
-      if pde_cnt < 1 and cnt_udt % 5 == 0:
-        dstep = 5
+      if cnt_st_off >= 3 and cnt_udt % 10 == 0:
+        dstep = 2
         run_udt = False
     else:
       if pde_cnt > 5:

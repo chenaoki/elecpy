@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.sparse as sp
-from scipy.linalg import norm as spnorm
+from scipy.sparse.linalg import norm
 
 def getPDEMatrix(h, w, xx, yy, ds):
 
@@ -124,7 +124,7 @@ class PDE(object):
     cnt = 0
     while error > tol:
       x_ = ( y_ - self.R.dot(x_old) ).multiply( self.Dinv )
-      error = np.linalg.norm((x_ - x_old).todense()) / np.linalg.norm((x_).todense())
+      error = norm(x_ - x_old) / norm(x_)
       x_old = x_
       cnt += 1
       if cnt >= maxcnt : break
