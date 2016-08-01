@@ -29,13 +29,16 @@ class Stimulator(object):
     if self.name == "edge_B" : self.set_edge_B(self.size) 
     if self.name == "point"  : self.set_point(self.size) 
 
+  def get_flag(self, t):
+    if t >= self.start and t < self.start + self.train * self.interval and (t - self.start) % self.interval < self.duration:
+      return True
+    else:
+      return False
+
   def get_current(self, t):
     assert self._map_on is not None
     assert self._map_off is not None
-    if t >= self.start and t < self.start + self.train * self.interval and (t - self.start) % self.interval < self.duration:
-      return self._map_on
-    else:
-      return self._map_off
+    return self._map_on if self.get_flag(t) else self._map_off
 
   def set_location(self):
     anode   = (( self._map_anode > 0 )*1).astype(np.float32)
@@ -114,8 +117,17 @@ if __name__ == '__main__':
   import matplotlib.pylab as plt
   from matplotlib import animation
   import json
+  from optparse import OptionParser
 
-  with open ('./sim_params.json','r') as f : sim_params = json.load(f)
+  parser = OptionParser()
+  parser.add_option(
+    '-p','--param_file', 
+    dest='param_file', action='store', type='string', default='./sim_params.json',
+    help="json file of simulation parameters")
+  (options, args) = parser.parse_args()
+  print options.param_file
+
+  with open (options.param_file,'r') as f : sim_params = json.load(f)
   stim_params = sim_params['stimulation']
   assert len(stim_params) > 0
   stims = []
@@ -143,7 +155,7 @@ if __name__ == '__main__':
         i_ext_e += s.get_current(t)
       print t
       yield i_ext_e
-      np.save('./result/stim_pattern/out_{0:0>4}'.format(int(t)), i_ext_e)
+      np.save('./stim_pattern/out_{0:0>4}'.format(int(t)), i_ext_e)
       t += dt
     exit()
 
