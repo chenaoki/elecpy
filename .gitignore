@@ -11,3 +11,4 @@ result/*
 sim_params.json 
 *.json 
 stim_pattern*
+*.dat
