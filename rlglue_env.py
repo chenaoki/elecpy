@@ -6,6 +6,7 @@ from rlglue.types import Observation
 from rlglue.types import Reward_observation_terminal
 
 import os
+import inspect
 import json
 import numpy as np
 import scipy
@@ -48,6 +49,7 @@ class ElecpyEnvironment(Environment):
     self.sigma_l_e  = sim_params['conductivity']['sigma_e']['long']  #3.75   # (mS/cm) 
     self.sigma_t_e  = sim_params['conductivity']['sigma_e']['tran']  #3.00   # (mS/cm)
     self.gameList   = sim_params['games']
+    self.stim_pnts  = sim_params['stim_pnts']
 
     self.sigma_l    = self.sigma_l_e + self.sigma_l_i
     self.sigma_t    = self.sigma_t_e + self.sigma_t_i
@@ -63,8 +65,6 @@ class ElecpyEnvironment(Environment):
     self.rhs_vmem   = np.zeros((self.im_h,self.im_w),dtype=np.float32)
     self.vmem       = np.zeros((self.im_h,self.im_w),dtype=np.float32)
     self.vmem       = self.cell_state[lr_params.index('v')].get()
-    self.stims      = []
-    
 
   def game_setup(self):
     
@@ -90,17 +90,30 @@ class ElecpyEnvironment(Environment):
       return -1
 
   def createObservation(self):
-    obs = Observation(
+    if self.obsImageSie != self.im_h:
+      obs = Observation(
         numDoubles = self.obsImageSie * self.obsImageSie) 
-    tmp = scipy.misc.imresize(self.vmem, (self.obsImageSie, self.obsImageSie)) 
-    obs.doubleArray = list(tmp.flatten()) 
+      tmp = scipy.misc.imresize(self.vmem, (self.obsImageSie, self.obsImageSie)) 
+      obs.doubleArray = list(tmp.flatten()) 
+    else:
+      obs = Observation(numDoubles = self.im_h * self.im_w) 
+      obs.doubleArray = list(self.vmem.flatten()) 
     return obs
+
 
   def env_init(self):
     print "[Env] init ...",
     assert self.obsImageSie > 0
     taskSpec = str(self.obsImageSie)
     print "done"
+    fig = plt.figure(figsize=(5,5))
+    self.im = plt.imshow(
+        np.zeros((self.im_h,self.im_w),dtype=np.float32), 
+        vmin = -100.0, vmax = 100.0, 
+        cmap=bipolar(neutral=0, lutsize=1024), 
+        interpolation='nearest')
+    plt.axis('off')
+    plt.pause(.01)
     return taskSpec 
 
   def env_start(self):
@@ -112,6 +125,7 @@ class ElecpyEnvironment(Environment):
     self.flg_st     = False
     self.cnt_st_off = 0
     self.gameIndex  = 0
+    self.stims      = []
     assert self.game_setup() >=0
     obs = self.createObservation()
     print "done"
@@ -121,6 +135,22 @@ class ElecpyEnvironment(Environment):
     print "[Env] step ...",
 
     time_start = self.t
+
+    # Action control
+    numAction = action.intArray[0]
+    print 'action {0},'.format(numAction),
+    assert numAction <= len( self.stim_pnts['locations'] )
+    if numAction > 0:
+      stim_param = {}
+      stim_param['name'] = 'point'
+      stim_param['start'] = self.t
+      stim_param['duration'] = self.stim_pnts['duration']
+      stim_param['interval'] = 1000 # long enough 
+      stim_param['amplitude'] = self.stim_pnts['amplitude']
+      stim_param['shape'] = [self.im_h, self.im_w] 
+      location = self.stim_pnts['locations'][numAction-1]
+      stim_param['size'] = [location[0], location[1], self.stim_pnts['size']]
+      self.stims.append(Stimulator(**stim_param))
 
     # Interval event
     while self.t < time_start + self.time_int:
@@ -132,7 +162,7 @@ class ElecpyEnvironment(Environment):
       self.i_ext_e[:,:] = 0.0
       flg_st_temp = False
       for s in self.stims:
-        self.i_ext_e += s.get_current(t)*self.Sv
+        self.i_ext_e += s.get_current(self.t)*self.Sv
         flg_st_temp = flg_st_temp or s.get_flag(self.t)
 
       # step.1 cell state transition
@@ -164,6 +194,8 @@ class ElecpyEnvironment(Environment):
         np.save      ('{0}/phie_{1:0>4}'.format(self.options.savepath,cnt_save), self.phie)
         np.save      ('{0}/vmem_{1:0>4}'.format(self.options.savepath,cnt_save), self.vmem)
         saveCellState('{0}/cell_{1:0>4}'.format(self.options.savepath,cnt_save), self.cell_state)
+        self.im.set_array(self.vmem)
+        plt.pause(.01)
 
       # Error check
       for i,v in enumerate(self.vmem.flatten()):
@@ -237,37 +269,21 @@ if __name__ == "__main__":
 
   if not options.test:
     EnvironmentLoader.loadEnvironment(ElecpyEnvironment(options))
+
   else:
-    
-    fig = plt.figure(figsize=(5,5))
-    im = plt.imshow(
-        np.zeros((50,50),dtype=np.float32), 
-        vmin = -100.0, vmax = 100.0, 
-        cmap=bipolar(neutral=0, lutsize=1024), 
-        interpolation='nearest')
-    plt.axis('off')
+    objEnv = ElecpyEnvironment(options)
+    objEnv.env_init()
+    for epi in range(3):
+      print 'Episode {0}'.format(epi)
+      objEnv.env_start()
+      cnt_step = 0
+      while True:
+        cnt_step += 1
+        action = Action(numInts=1)
+        action.intArray = [0]
+        rot = objEnv.env_step(action)
+        if rot.terminal:
+          break
+        else:
+          print cnt_step, rot.r
 
-    def sim():
-      objEnv = ElecpyEnvironment(options)
-      objEnv.env_init()
-      for epi in range(3):
-        print 'Episode {0}'.format(epi)
-        objEnv.env_start()
-        while True:
-          rot = objEnv.env_step(0)
-          if rot.terminal:
-            break
-          else:
-            yield [rot]
-
-      exit()
-
-    def draw(data):
-      rot = data[0]
-      tmp = np.array(rot.o.doubleArray)
-      tmp = tmp.reshape((50,50))
-      im.set_array(tmp)
-      return [im]
-
-    ani = animation.FuncAnimation(fig, draw, sim, blit=False, interval=200, repeat=False)
-    plt.show()
