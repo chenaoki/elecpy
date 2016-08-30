@@ -24,8 +24,6 @@ from cmap_bipolar import bipolar
 from Stimulator import Stimulator
 
 import sys
-sys.path.append('/Users/tomii/Source/Python/opmap')
-import opmap
 from opmap.opmap import VmemMap, PhaseMap, PhaseVarianceMap
 
 class ElecpyEnvironment(Environment):
