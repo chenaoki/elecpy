@@ -6,7 +6,7 @@ Simple RL glue experiment setup
 import numpy as np
 import rlglue.RLGlue as RLGlue
 
-epi = 0
+epi = 1
 epi_learn = 0
 epi_max = 1000
 

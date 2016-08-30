@@ -23,6 +23,11 @@ from luorudy import params as lr_params
 from cmap_bipolar import bipolar
 from Stimulator import Stimulator
 
+import sys
+sys.path.append('/Users/tomii/Source/Python/opmap')
+import opmap
+from opmap.opmap import VmemMap, PhaseMap, PhaseVarianceMap
+
 class ElecpyEnvironment(Environment):
   obsImageSie = 50
 
@@ -73,6 +78,11 @@ class ElecpyEnvironment(Environment):
       game = self.gameList[self.gameIndex]
       # print "[Env] game", self.gameIndex, json.dumps( game, indent=4),
 
+      self.savedir    = self.options.savepath + '/episode{0}'.format(self.cntEpi) 
+      if not os.path.isdir(self.savedir) : os.mkdir(self.savedir)
+      self.savedir    += '/game{0}'.format(self.gameIndex) 
+      if not os.path.isdir(self.savedir) : os.mkdir(self.savedir)
+      
       self.phie       = np.load('{path}/phie_{start:0>4}.npy'.format(**game))
       self.vmem       = np.load('{path}/vmem_{start:0>4}.npy'.format(**game))
       self.cell_state = loadCellState('{path}/cell_{start:0>4}'.format(**game))
@@ -84,10 +94,36 @@ class ElecpyEnvironment(Environment):
       self.flg_st     = False
       self.cnt_st_off = 0
       self.gameIndex += 1
+
+      # Phase variance
+      tmp = VmemMap(
+        path='{path}'.format(**game),
+        cam_type='numpy',
+        image_width=self.im_w,
+        image_height=self.im_h,
+        frame_start=0,
+        frame_end=-1
+      )
+      pmap = PhaseMap(tmp)
+      self.pvmap_org = PhaseVarianceMap(pmap)
+
       return self.gameIndex
 
     else:
       return -1
+
+  def calcReward(self):
+    tmp = VmemMap(
+      path=self.options.savepath,
+      cam_type='numpy',
+      image_width=self.im_w,
+      image_height=self.im_h,
+      frame_start=0,
+      frame_end=-1
+    )
+    pmap = PhaseMap(tmp)
+    pvmap = PhaseVarianceMap(pmap)
+    # compare with self.pvmap_org 
 
   def createObservation(self):
     if self.obsImageSie != self.im_h:
@@ -105,7 +141,7 @@ class ElecpyEnvironment(Environment):
     print "[Env] init ...",
     assert self.obsImageSie > 0
     taskSpec = str(self.obsImageSie)
-    print "done"
+    self.cntEpi = 0
     fig = plt.figure(figsize=(5,5))
     self.im = plt.imshow(
         np.zeros((self.im_h,self.im_w),dtype=np.float32), 
@@ -114,6 +150,7 @@ class ElecpyEnvironment(Environment):
         interpolation='nearest')
     plt.axis('off')
     plt.pause(.01)
+    print "done"
     return taskSpec 
 
   def env_start(self):
@@ -128,6 +165,7 @@ class ElecpyEnvironment(Environment):
     self.stims      = []
     assert self.game_setup() >=0
     obs = self.createObservation()
+    self.cntEpi += 1
     print "done"
     return obs
 
@@ -153,11 +191,11 @@ class ElecpyEnvironment(Environment):
       self.stims.append(Stimulator(**stim_param))
 
     # Interval event
-    while self.t < time_start + self.time_int:
+    while self.t < time_start + self.time_int or len(self.stims) >= self.stim_pnts['maxcnt']:
 
       self.t = self.cnt_udt * self.udt
       self.dt = self.dstep * self.udt
-      
+
       # Stimulation control
       self.i_ext_e[:,:] = 0.0
       flg_st_temp = False
@@ -191,9 +229,9 @@ class ElecpyEnvironment(Environment):
         #print '------------------{0}ms'.format(cnt_save)
         #print '+' if self.flg_st else '-',
         #print '+' if self.run_udt else '-'
-        np.save      ('{0}/phie_{1:0>4}'.format(self.options.savepath,cnt_save), self.phie)
-        np.save      ('{0}/vmem_{1:0>4}'.format(self.options.savepath,cnt_save), self.vmem)
-        saveCellState('{0}/cell_{1:0>4}'.format(self.options.savepath,cnt_save), self.cell_state)
+        np.save      ('{0}/phie_{1:0>4}'.format(self.savedir,cnt_save), self.phie)
+        np.save      ('{0}/vmem_{1:0>4}'.format(self.savedir,cnt_save), self.vmem)
+        saveCellState('{0}/cell_{1:0>4}'.format(self.savedir,cnt_save), self.cell_state)
         self.im.set_array(self.vmem)
         plt.pause(.01)
 
