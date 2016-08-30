@@ -1,0 +1,48 @@
+{
+    "conductivity":{
+        "Sv" : 1400,
+        "Cm" : 1.0,
+        "sigma_i" : {
+            "long" : 3.75,
+            "tran" : 1.5
+        },
+        "sigma_e" : {
+            "long" : 3.75,
+            "tran" : 3.0
+        }
+    },
+    "geometory" : {
+        "height":200,
+        "width":200,
+        "ds":1.5e-2
+    },
+    "time" : {
+        "udt" : 1.0e-3,
+        "cnt_log" : 1000
+    },
+    "stim_pnts" : {
+        "amplitude": 100.0, 
+        "duration": 2.0, 
+        "size" : 7,
+        "maxcnt" : 4,
+        "locations": [
+          [  50,  50],
+          [ 100,  50],
+          [ 150,  50],
+          [  50, 100],
+          [ 100, 100],
+          [ 150, 100],
+          [  50, 150],
+          [ 100, 150],
+          [ 150, 150]
+        ]
+    },
+    "games" : [
+        {
+            "path" : "./result/sample",
+            "start" : 1275,
+            "end" : 1500,
+            "interval" : 30.0
+        }
+    ]
+}
