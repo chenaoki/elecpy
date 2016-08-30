@@ -1,8 +1,7 @@
 import sys
-sys.path.append('/Users/tomii/Source/Python/dqn_chainer/dqn_chainer')
 
 from rlglue.agent import AgentLoader as AgentLoader
-from dqn_agent import dqn_agent
+from dqn_chainer.dqn_agent import dqn_agent
 from optparse import OptionParser
 
 if __name__ == "__main__":
