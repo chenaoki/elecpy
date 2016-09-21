@@ -15,6 +15,7 @@ import chainer
 from chainer import cuda
 from matplotlib import animation
 from optparse import OptionParser
+from scipy import ndimage
 
 from PDE import PDE
 from luorudy import luorudy
@@ -24,7 +25,7 @@ from cmap_bipolar import bipolar
 from Stimulator import Stimulator
 
 import sys
-from opmap.opmap import VmemMap, PhaseMap, PhaseVarianceMap
+from opmap.opmap import RawCam, VmemMap, PhaseMap, PhaseVarianceMap, CoreMap
 
 class ElecpyEnvironment(Environment):
   obsImageSie = 50
@@ -85,43 +86,36 @@ class ElecpyEnvironment(Environment):
       self.vmem       = np.load('{path}/vmem_{start:0>4}.npy'.format(**game))
       self.cell_state = loadCellState('{path}/cell_{start:0>4}'.format(**game))
       self.time_end   = game["end"]
-      self.time_int   = game["interval"]
       self.cnt_udt    = game["start"] * self.cnt_log
       self.t          = self.cnt_udt * self.udt
       self.run_udt    = True
       self.flg_st     = False
       self.cnt_st_off = 0
       self.gameIndex += 1
+      self.stims      = []
 
       # Phase variance
-      tmp = VmemMap(
+      cam = RawCam(
         path='{path}'.format(**game),
         cam_type='numpy',
         image_width=self.im_w,
         image_height=self.im_h,
         frame_start=0,
-        frame_end=-1
+        frame_end=int(game["start"])
       )
-      pmap = PhaseMap(tmp)
-      self.pvmap_org = PhaseVarianceMap(pmap)
+      vmem = VmemMap(cam)
+      pmap = PhaseMap(vmem)
+      pvmap = PhaseVarianceMap(pmap)
+      coremap = CoreMap(pvmap)
+      im_core, pnts_core = coremap.getFrameCore(-1)
+      np.save('{0}/coremap_org'.format(self.savedir), im_core)
+      self.penalty_org = 0
+      for p in pnts_core : self.penalty_org += p[1] # x-axis position
 
       return self.gameIndex
 
     else:
       return -1
-
-  def calcReward(self):
-    tmp = VmemMap(
-      path=self.options.savepath,
-      cam_type='numpy',
-      image_width=self.im_w,
-      image_height=self.im_h,
-      frame_start=0,
-      frame_end=-1
-    )
-    pmap = PhaseMap(tmp)
-    pvmap = PhaseVarianceMap(pmap)
-    # compare with self.pvmap_org 
 
   def createObservation(self):
     if self.obsImageSie != self.im_h:
@@ -153,6 +147,7 @@ class ElecpyEnvironment(Environment):
 
   def env_start(self):
     print "[Env] start ...",
+    self.cntEpi     += 1
     self.t          = 0.                           # Time (ms)
     self.cnt_udt    = 0                            # Count of udt
     self.dstep      = 1                            # Time step (# of udt) 
@@ -160,10 +155,8 @@ class ElecpyEnvironment(Environment):
     self.flg_st     = False
     self.cnt_st_off = 0
     self.gameIndex  = 0
-    self.stims      = []
     assert self.game_setup() >=0
     obs = self.createObservation()
-    self.cntEpi += 1
     print "done"
     return obs
 
@@ -189,7 +182,8 @@ class ElecpyEnvironment(Environment):
       self.stims.append(Stimulator(**stim_param))
 
     # Interval event
-    while self.t < time_start + self.time_int or len(self.stims) >= self.stim_pnts['maxcnt']:
+    t_end = time_start + self.stim_pnts['intervalTime'] if len(self.stims) < self.stim_pnts['maxcnt'] else self.time_end
+    while self.t < t_end:
 
       self.t = self.cnt_udt * self.udt
       self.dt = self.dstep * self.udt
@@ -220,20 +214,20 @@ class ElecpyEnvironment(Environment):
       self.rhs_vmem *= 1 / (self.Cm * self.Sv)
       self.vmem += self.dt * self.rhs_vmem
 
-      # Logging & error check
-      flg_error = False
+      # Logging
       if self.cnt_udt % self.cnt_log < self.dstep:
         cnt_save = self.cnt_udt // self.cnt_log
-        #print '------------------{0}ms'.format(cnt_save)
+        print '------------------{0}ms'.format(cnt_save)
         #print '+' if self.flg_st else '-',
         #print '+' if self.run_udt else '-'
         np.save      ('{0}/phie_{1:0>4}'.format(self.savedir,cnt_save), self.phie)
         np.save      ('{0}/vmem_{1:0>4}'.format(self.savedir,cnt_save), self.vmem)
-        saveCellState('{0}/cell_{1:0>4}'.format(self.savedir,cnt_save), self.cell_state)
+        #saveCellState('{0}/cell_{1:0>4}'.format(self.savedir,cnt_save), self.cell_state)
         self.im.set_array(self.vmem)
         plt.pause(.01)
 
       # Error check
+      flg_error = False
       for i,v in enumerate(self.vmem.flatten()):
         if v != v :
           print "[Env] error : invalid value {1} @ {0} ms, index {2}".format(self.t, v, i)
@@ -262,6 +256,27 @@ class ElecpyEnvironment(Environment):
     # Game stage control
     terminal = False
     if flg_error or self.t >= self.time_end:
+
+      cam = RawCam(
+        path=self.savedir,
+        cam_type='numpy',
+        image_width=self.im_w,
+        image_height=self.im_h,
+        frame_start=0,
+        frame_end=-1
+      )
+      vmem = VmemMap(cam)
+      pmap = PhaseMap(vmem)
+      pvmap = PhaseVarianceMap(pmap)
+      coremap = CoreMap(pvmap)
+      im_core, pnts_core = coremap.getFrameCore(-1)
+      np.save('{0}/coremap_dst'.format(self.savedir, self.t), coremap)
+      self.penalty_dst = 0
+      for p in pnts_core : self.penalty_dst += p[1] # x-axis position
+      
+      reward = self.penalty_org - self.penalty_dst
+      print 'reward:{0}'.format(reward),
+
       if self.game_setup() < 0:
         terminal = True
 
@@ -273,8 +288,7 @@ class ElecpyEnvironment(Environment):
     )
 
     #return self.t, rot # for display
-    print "time {0},".format(self.t),
-    print "done"
+    print "step done"
     return rot
 
   def env_cleanup(self):

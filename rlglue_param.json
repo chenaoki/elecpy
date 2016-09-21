@@ -21,10 +21,11 @@
         "cnt_log" : 1000
     },
     "stim_pnts" : {
-        "amplitude": 100.0, 
+        "amplitude": 80.0, 
         "duration": 2.0, 
-        "size" : 7,
-        "maxcnt" : 4,
+        "size" : 5,
+        "maxcnt" : 2,
+        "intervalTime" : 5,
         "locations": [
           [  50,  50],
           [ 100,  50],
@@ -40,9 +41,23 @@
     "games" : [
         {
             "path" : "./result/sample",
-            "start" : 1275,
-            "end" : 1500,
-            "interval" : 30.0
+            "start" : 1200,
+            "end" : 1220
+        },
+        {
+            "path" : "./result/sample",
+            "start" : 1250,
+            "end" : 1270
+        },
+        {
+            "path" : "./result/sample",
+            "start" : 1300,
+            "end" : 1320
+        },
+        {
+            "path" : "./result/sample",
+            "start" : 1350,
+            "end" : 1370
         }
     ]
 }
