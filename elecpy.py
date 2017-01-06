@@ -67,7 +67,7 @@ sigma_t_e    = 3.00                  # (mS/cm)
 
 fig = plt.figure(figsize=(5,5))
 im = plt.imshow(
-    np.zeros((im_h,im_w),dtype=np.float32), 
+    np.zeros((im_h,im_w),dtype=np.float64), 
     vmin = -100.0, vmax = 100.0, 
     cmap=bipolar(neutral=0, lutsize=1024), 
     interpolation='nearest')
@@ -86,13 +86,13 @@ def sim( ):
   # Stimulators    
   print "Allocating data...",
   cell_state = createCellState((im_h,im_w))
-  i_ion              = np.zeros((im_h,im_w),dtype=np.float32)
-  phie               = np.zeros((im_h,im_w),dtype=np.float32)
-  i_ext_e            = np.zeros((im_h,im_w),dtype=np.float32)
-  i_ext_i            = np.zeros((im_h,im_w),dtype=np.float32)
-  rhs_phie           = np.zeros((im_h,im_w),dtype=np.float32)
-  rhs_vmem           = np.zeros((im_h,im_w),dtype=np.float32)
-  vmem               = np.zeros((im_h,im_w),dtype=np.float32)
+  i_ion              = np.zeros((im_h,im_w),dtype=np.float64)
+  phie               = np.zeros((im_h,im_w),dtype=np.float64)
+  i_ext_e            = np.zeros((im_h,im_w),dtype=np.float64)
+  i_ext_i            = np.zeros((im_h,im_w),dtype=np.float64)
+  rhs_phie           = np.zeros((im_h,im_w),dtype=np.float64)
+  rhs_vmem           = np.zeros((im_h,im_w),dtype=np.float64)
+  vmem               = np.zeros((im_h,im_w),dtype=np.float64)
   vmem               = cell_state[lr_params.index('v')].get()
   if options.cnt_restart >= 0:
     pfx = '_{0:0>4}'.format(options.cnt_restart)
