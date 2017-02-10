@@ -141,6 +141,30 @@ const_d = {
 	'kmcmdn_'  : 0.00238,  # Equalibrium constant of buffering for CMDN (mM)
 	'kmtrpn_'  : 0.0005,   # Equalibrium constant of buffering for TRPN (mM)
 
-  'sigma_' : (exp(130.0/67.3)-1)/7   #(exp(nao_/67.3)-1)/7
+  'sigma_' : (exp(130.0/67.3)-1)/7,  #(exp(nao_/67.3)-1)/7
+
+  # Q10 for conductance of ion currents
+  'Q10NA_'   : 1.5,
+  'Q10CAL_'  : 2.96,
+  'Q10CAT_'  : 2.5,
+  'Q10KR_'   : 1.94,
+  'Q10KS_'   : 2.2,
+  'Q10K1_'   : 1.5,
+  'Q10TO_'   : 6.14,
+  'Q10NACA_' : 2.2,
+  'Q10NAK_'  : 1.87,
+  'Q10REL_'  : 1.68,
+
+  # Shift in steady-state (in)activation curves [mV/K]
+  'SINFM_' : 0.8,
+  'SINFHJ_' : 0.7,
+  'SINFXR_' : -1.16,
+
+  # Q10 for time constant of (in)activation
+  'Q10TAUMHJ_' : 2.79,
+  'Q10TAUD_' : 2.52,
+  'Q10TAUF_' : 2.82,
+  'Q10TAUXR_' : 6.25,
+  'Q10TAUXS_' : 2.58,
 
 }
