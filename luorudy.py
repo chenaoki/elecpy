@@ -7,10 +7,14 @@ from chainer import cuda, Function, FunctionSet, Variable
 from chainer.functions.connection.convolution_2d import convolution_2d
 xp = cuda.cupy
 
-from const import const_d
+from const_ORd import const_d
 import os
 
-params = [ 'v', 'temp', 'dt',  'h',  'j',  'm',  'nai',  'naiss',  'cai',  'caiss',  'ki',  'kiss',  'ltypeCzero',  'ltypeCone',  'ltypeCtwo',  'ltypeCthree',  'ltypeIVf',  'ltypeIVs',  'ltypeO',  'fcasc',  'fmode0',  'ical',  'ilcana',  'ilcak',  'irel',  'itr',  'b',  'g',  'xr',  'xs1',  'xs2',  'inacass',  'nsr',  'ryrCone',  'ryrCtwo',  'ryrCthree',  'ryrCfour',  'ryrOone',  'ryrIone',  'ryrItwo',  'ryrIthree',  'ryrIfour',  'ryrIfive',  'csqn',  'jsr', 'it', 'st']
+params = [ 'v', 'temp', 'dt',  'CaMKt',  'nai',  'nass',  'ki',  'kss',  'cai',
+           'cass',  'm',  'hf',  'hs',  'j',  'jp',  'hsp',  'mL',  'hL',  'hLp',
+           'a',  'iF',  'iS',  'ap',  'iFp',  'iSp',  'd',  'ff',  'fs',  'fcaf',
+           'fcas',  'jca',  'ffp',  'fcafp',  'nca',  'xrf',  'xrs',  'xs1',
+           'xs2',  'xk1',  'Jrelnp',  'Jrelp',  'cansr',  'cajsr',  'st']
 
 string_args = ''
 string_rets = ''
@@ -19,8 +23,9 @@ for i, key in enumerate(params) :
   string_rets += 'T _{0}, '.format(key)
 string_args = string_args.rstrip(', ')
 string_rets = string_rets.rstrip(', ')
-elemwise = open('ElementwiseKernel.c').read().format(**const_d)
-
+elemwise = open('ElementwiseKernel_ORd.c').read().format(**const_d)
+print(elemwise)
+exit()
 def createCellState(shape):
   state = [ xp.asarray( np.ones(shape, dtype=np.float32) * const_d[param+'_'] ) for param in params ]
   return state
