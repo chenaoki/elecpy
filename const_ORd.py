@@ -5,6 +5,7 @@ const_d = {
   # Initial values of variables
   'v_'           : -87.5          , # Membrane voltage
   'dt_'          : 0.001          , # Time step (ms)
+  'it_'          : 0.0            , # total ion current
   'm_'           : 0.0            , # Na activation
   'hf_'          : 1.0            , # Na inactivation
   'hs_'          : 1.0            , #
@@ -40,6 +41,8 @@ const_d = {
   'kss_'         : 145.0          , # Subspace Na (mM)
   'cai_'         : 0.0001         , # Intracellular Ca (mM)
   'cass_'        : 0.0001         , # Subspace Ca (mM)
+  'cansr_'       : 1.2            , #
+  'cajsr_'       : 1.2            , #
   'Jrelnp_'      : 0.0            , #
   'Jrelp_'       : 0.0            , #
   'CaMKt_'       : 0.0            , # calmodulin-dependent protein kinase II total?

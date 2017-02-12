@@ -1,29 +1,5 @@
 #define CELLTYPE_EPI
 
-T maskPosi;
-T maskNega;
-
-_v = v;
-
-// voltage trapping to avoid error
-maskPosi =  ( _v < 0.00001 ) * 1;
-maskPosi *= ( _v >= 0 ) * 1;
-maskNega = ( maskPosi == 0 ) * 1;
-_v = maskPosi * 0.00001 + maskNega * _v;
-maskPosi =  ( _v > -0.00001 ) * 1;
-maskPosi *= ( _v <= 0 ) * 1;
-maskNega = ( maskPosi == 0 ) * 1;
-_v = maskPosi * -0.00001 + maskNega * _v;
-
-maskPosi =  ( _v < -30.0+0.001 ) * 1;
-maskPosi *= ( _v >= -30.0 ) * 1;
-maskNega = ( maskPosi == 0 ) * 1;
-_v = maskPosi * (-30.0+0.001)+ maskNega * _v;
-maskPosi =  ( _v > -30.0 -0.001 ) * 1;
-maskPosi *= ( _v <= -30.0 ) * 1;
-maskNega = ( maskPosi == 0 ) * 1;
-_v = maskPosi * (-30.0-0.001) + maskNega * _v;
-
 // compute reversal potentials
 T ENa = {R_}*temp/{frdy_}*log({nao_}/nai);
 T EK  = {R_}*temp/{frdy_}*log({ko_}/ki);
@@ -32,25 +8,25 @@ T EKs = {R_}*temp/{frdy_}*log(({ko_}+{prnak_}*{nao_})/(ki+{prnak_}*nai));
 // CaMK valuables?
 T CaMKb = {CaMKo_}*(1.0-CaMKt)/(1.0+{KmCaM_}/cass);
 T CaMKa = CaMKb+CaMKt;
-T vffrt = _v*{frdy_}*{frdy_}/({R_}*temp);
-T vfrt  = _v*{frdy_}/({R_}*temp);
+T vffrt = v*{frdy_}*{frdy_}/({R_}*temp);
+T vfrt  = v*{frdy_}/({R_}*temp);
 
 //Na ion current
-T mss   = 1.0/(1.0+exp((-(_v+39.57))/9.871));
-T tm    = 1.0/(6.765*exp((_v+11.64)/34.77)+8.552*exp(-(_v+77.42)/5.955));
+T mss   = 1.0/(1.0+exp((-(v+39.57))/9.871));
+T tm    = 1.0/(6.765*exp((v+11.64)/34.77)+8.552*exp(-(v+77.42)/5.955));
 _m      = mss-(mss-m)*exp(-dt/tm);
 T hss   = 1.0/(1+exp((v+82.90)/6.086));
-T thf   = 1.0/(1.432e-5*exp(-(_v+1.196)/6.285)+6.149*exp((_v+0.5096)/20.27));
-T ths   = 1.0/(0.009794*exp(-(_v+17.95)/28.05)+0.3343*exp((_v+5.730)/56.66));
+T thf   = 1.0/(1.432e-5*exp(-(v+1.196)/6.285)+6.149*exp((v+0.5096)/20.27));
+T ths   = 1.0/(0.009794*exp(-(v+17.95)/28.05)+0.3343*exp((v+5.730)/56.66));
 T Ahf   = 0.99;
 T Ahs   = 1.0-Ahf;
 _hf     = hss-(hss-hf)*exp(-dt/thf);
 _hs     = hss-(hss-hs)*exp(-dt/ths);
 T h     = Ahf*_hf+Ahs*_hs;
 T jss   = hss;
-T tj    = 2.038+1.0/(0.02136*exp(-(_v+100.6)/8.281)+0.3052*exp((_v+0.9941)/38.45));
+T tj    = 2.038+1.0/(0.02136*exp(-(v+100.6)/8.281)+0.3052*exp((v+0.9941)/38.45));
 _j      = jss-(jss-j)*exp(-dt/tj);
-T hssp  = 1.0/(1+exp((_v+89.1)/6.086));
+T hssp  = 1.0/(1+exp((v+89.1)/6.086));
 T thsp  = 3.0*ths;
 _hsp    = hssp-(hssp-hsp)*exp(-dt/thsp);
 T hp    = Ahf*_hf+Ahs*_hsp;
@@ -58,16 +34,16 @@ T tjp   = 1.46*tj;
 _jp     = jss-(jss-jp)*exp(-dt/tjp);
 T GNa   = 75; //conductance
 T fINap = (1.0/(1.0+{KmCaMK_}/CaMKa));
-T INa    = GNa*(_v-ENa)*_m*_m*_m*((1.0-fINap)*h*_j+fINap*hp*_jp);
+T INa    = GNa*(v-ENa)*_m*_m*_m*((1.0-fINap)*h*_j+fINap*hp*_jp);
 
 // NaL ion current
-T mLss   = 1.0/(1.0+exp((-(_v+42.85))/5.264));
+T mLss   = 1.0/(1.0+exp((-(v+42.85))/5.264));
 T tmL    = tm;
 _mL      = mLss-(mLss-mL)*exp(-dt/tmL);
-T hLss   = 1.0/(1.0+exp((_v+87.61)/7.488));
+T hLss   = 1.0/(1.0+exp((v+87.61)/7.488));
 T thL    = 200.0;
 _hL      = hLss-(hLss-hL)*exp(-dt/thL);
-T hLssp  = 1.0/(1.0+exp((_v+93.81)/7.488));
+T hLssp  = 1.0/(1.0+exp((v+93.81)/7.488));
 T thLp   = 3.0*thL;
 _hLp     = hLssp-(hLssp-hLp)*exp(-dt/thLp);
 T GNaL   = 0.0075;
@@ -76,32 +52,32 @@ T GNaL   = 0.0075;
 GNaL    *= 0.6;
 #endif
 T fINaLp = (1.0/(1.0+{KmCaMK_}/CaMKa));
-T INaL    = GNaL*(_v-ENa)*_mL*((1.0-fINaLp)*_hL+fINaLp*_hLp);
+T INaL    = GNaL*(v-ENa)*_mL*((1.0-fINaLp)*_hL+fINaLp*_hLp);
 
 //Ito ion current
-T ass     = 1.0/(1.0+exp((-(_v-14.34))/14.82));
-T ta      = 1.0515/(1.0/(1.2089*(1.0+exp(-(_v-18.4099)/29.3814)))+3.5/(1.0+exp((_v+100.0)/29.3814)));
+T ass     = 1.0/(1.0+exp((-(v-14.34))/14.82));
+T ta      = 1.0515/(1.0/(1.2089*(1.0+exp(-(v-18.4099)/29.3814)))+3.5/(1.0+exp((v+100.0)/29.3814)));
 _a        = ass-(ass-a)*exp(-dt/ta);
-T iss     = 1.0/(1.0+exp((_v+43.94)/5.711));
+T iss     = 1.0/(1.0+exp((v+43.94)/5.711));
 T delta_epi;
 #ifdef CELLTYPE_EPI
-delta_epi = 1.0-(0.95/(1.0+exp((_v+70.0)/5.0)));
+delta_epi = 1.0-(0.95/(1.0+exp((v+70.0)/5.0)));
 #else
 delta_epi=1.0;
 #endif
-T tiF         = 4.562+1/(0.3933*exp((-(_v+100.0))/100.0)+0.08004*exp((_v+50.0)/16.59));
-T tiS         = 23.62+1/(0.001416*exp((-(_v+96.52))/59.05)+1.780e-8*exp((_v+114.1)/8.079));
+T tiF         = 4.562+1/(0.3933*exp((-(v+100.0))/100.0)+0.08004*exp((v+50.0)/16.59));
+T tiS         = 23.62+1/(0.001416*exp((-(v+96.52))/59.05)+1.780e-8*exp((v+114.1)/8.079));
 tiF          *= delta_epi;
 tiS          *= delta_epi;
-T AiF         = 1.0/(1.0+exp((_v-213.6)/151.2));
+T AiF         = 1.0/(1.0+exp((v-213.6)/151.2));
 T AiS         = 1.0-AiF;
 _iF           = iss-(iss-iF)*exp(-dt/tiF);
 _iS           = iss-(iss-iS)*exp(-dt/tiS);
 T c           = AiF*_iF+AiS*_iS;
-T assp        = 1.0/(1.0+exp((-(_v-24.34))/14.82));
+T assp        = 1.0/(1.0+exp((-(v-24.34))/14.82));
 _ap           = assp-(assp-ap)*exp(-dt/ta);
-T dti_develop = 1.354+1.0e-4/(exp((_v-167.4)/15.89)+exp(-(_v-12.23)/0.2154));
-T dti_recover = 1.0-0.5/(1.0+exp((_v+70.0)/20.0));
+T dti_develop = 1.354+1.0e-4/(exp((v-167.4)/15.89)+exp(-(v-12.23)/0.2154));
+T dti_recover = 1.0-0.5/(1.0+exp((v+70.0)/20.0));
 T tiFp        = dti_develop*dti_recover*tiF;
 T tiSp        = dti_develop*dti_recover*tiS;
 _iFp          = iss-(iss-iFp)*exp(-dt/tiFp);
@@ -115,24 +91,24 @@ Gto*=4.0;
 Gto*=4.0;
 #endif
 T fItop       = (1.0/(1.0+{KmCaMK_}/CaMKa));
-T Ito          = Gto*(_v-EK)*((1.0-fItop)*_a*c+fItop*_ap*ip);
+T Ito          = Gto*(v-EK)*((1.0-fItop)*_a*c+fItop*_ap*ip);
 
 // Ca ion current
-T dss     = 1.0/(1.0+exp((-(_v+3.940))/4.230));
-T td      = 0.6+1.0/(exp(-0.05*(_v+6.0))+exp(0.09*(_v+14.0)));
+T dss     = 1.0/(1.0+exp((-(v+3.940))/4.230));
+T td      = 0.6+1.0/(exp(-0.05*(v+6.0))+exp(0.09*(v+14.0)));
 _d        = dss-(dss-d)*exp(-dt/td);
-T fss     = 1.0/(1.0+exp((_v+19.58)/3.696));
-T tff     = 7.0+1.0/(0.0045*exp(-(_v+20.0)/10.0)+0.0045*exp((_v+20.0)/10.0));
-T tfs     = 1000.0+1.0/(0.000035*exp(-(_v+5.0)/4.0)+0.000035*exp((_v+5.0)/6.0));
+T fss     = 1.0/(1.0+exp((v+19.58)/3.696));
+T tff     = 7.0+1.0/(0.0045*exp(-(v+20.0)/10.0)+0.0045*exp((v+20.0)/10.0));
+T tfs     = 1000.0+1.0/(0.000035*exp(-(v+5.0)/4.0)+0.000035*exp((v+5.0)/6.0));
 T Aff     = 0.6;
 T Afs     = 1.0-Aff;
 _ff       = fss-(fss-ff)*exp(-dt/tff);
 _fs       = fss-(fss-fs)*exp(-dt/tfs);
 T f       = Aff*_ff+Afs*_fs;
 T fcass   = fss;
-T tfcaf   = 7.0+1.0/(0.04*exp(-(_v-4.0)/7.0)+0.04*exp((_v-4.0)/7.0));
-T tfcas   = 100.0+1.0/(0.00012*exp(-_v/3.0)+0.00012*exp(_v/7.0));
-T Afcaf   = 0.3+0.6/(1.0+exp((_v-10.0)/10.0));
+T tfcaf   = 7.0+1.0/(0.04*exp(-(v-4.0)/7.0)+0.04*exp((v-4.0)/7.0));
+T tfcas   = 100.0+1.0/(0.00012*exp(-v/3.0)+0.00012*exp(v/7.0));
+T Afcaf   = 0.3+0.6/(1.0+exp((v-10.0)/10.0));
 T Afcas   = 1.0-Afcaf;
 _fcaf     = fcass-(fcass-fcaf)*exp(-dt/tfcaf);
 _fcas     = fcass-(fcass-fcas)*exp(-dt/tfcas);
@@ -171,15 +147,15 @@ T ICaNa    = (1.0-fICaLp)*PCaNa*PhiCaNa*_d*(f*(1.0-_nca)+_jca*fca*_nca)+fICaLp*P
 T ICaK     = (1.0-fICaLp)*PCaK*PhiCaK*_d*(f*(1.0-_nca)+_jca*fca*_nca)+fICaLp*PCaKp*PhiCaK*_d*(fp*(1.0-_nca)+_jca*fcap*_nca);
 
 // IKr ion current
-T xrss = 1.0/(1.0+exp((-(_v+8.337))/6.789));
-T txrf = 12.98+1.0/(0.3652*exp((_v-31.66)/3.869)+4.123e-5*exp((-(_v-47.78))/20.38));
-T txrs = 1.865+1.0/(0.06629*exp((_v-34.70)/7.355)+1.128e-5*exp((-(_v-29.74))/25.94));
-T Axrf = 1.0/(1.0+exp((_v+54.81)/38.21));
+T xrss = 1.0/(1.0+exp((-(v+8.337))/6.789));
+T txrf = 12.98+1.0/(0.3652*exp((v-31.66)/3.869)+4.123e-5*exp((-(v-47.78))/20.38));
+T txrs = 1.865+1.0/(0.06629*exp((v-34.70)/7.355)+1.128e-5*exp((-(v-29.74))/25.94));
+T Axrf = 1.0/(1.0+exp((v+54.81)/38.21));
 T Axrs = 1.0-Axrf;
 _xrf   = xrss-(xrss-xrf)*exp(-dt/txrf);
 _xrs   = xrss-(xrss-xrs)*exp(-dt/txrs);
 T xr   = Axrf*_xrf+Axrs*_xrs;
-T rkr  = 1.0/(1.0+exp((_v+55.0)/75.0))*1.0/(1.0+exp((_v-10.0)/30.0));
+T rkr  = 1.0/(1.0+exp((v+55.0)/75.0))*1.0/(1.0+exp((v-10.0)/30.0));
 T GKr  = 0.046;
 #ifdef CELLTYPE_EPI
 GKr*=1.3;
@@ -187,27 +163,27 @@ GKr*=1.3;
 #ifdef CELLTYPE_M
 GKr*=0.8;
 #endif
-T IKr  = GKr*sqrt({ko_}/5.4)*xr*rkr*(_v-EK);
+T IKr  = GKr*sqrt({ko_}/5.4)*xr*rkr*(v-EK);
 
 // IKs ion current
-T xs1ss = 1.0/(1.0+exp((-(_v+11.60))/8.932));
-T txs1  = 817.3+1.0/(2.326e-4*exp((_v+48.28)/17.80)+0.001292*exp((-(_v+210.0))/230.0));
+T xs1ss = 1.0/(1.0+exp((-(v+11.60))/8.932));
+T txs1  = 817.3+1.0/(2.326e-4*exp((v+48.28)/17.80)+0.001292*exp((-(v+210.0))/230.0));
 _xs1    = xs1ss-(xs1ss-xs1)*exp(-dt/txs1);
 T xs2ss = xs1ss;
-T txs2  = 1.0/(0.01*exp((_v-50.0)/20.0)+0.0193*exp((-(_v+66.54))/31.0));
+T txs2  = 1.0/(0.01*exp((v-50.0)/20.0)+0.0193*exp((-(v+66.54))/31.0));
 _xs2    = xs2ss-(xs2ss-xs2)*exp(-dt/txs2);
 T KsCa  = 1.0+0.6/(1.0+pow(3.8e-5/cai,1.4));
 T GKs   = 0.0034;
 #ifdef CELLTYPE_EPI
 GKs*=1.4;
 #endif
-T IKs   = GKs*KsCa*_xs1*_xs2*(_v-EKs);
+T IKs   = GKs*KsCa*_xs1*_xs2*(v-EKs);
 
 // IK1 ion current
-T xk1ss = 1.0/(1.0+exp(-(_v+2.5538*{ko_}+144.59)/(1.5692*{ko_}+3.8115)));
-T txk1  = 122.2/(exp((-(_v+127.2))/20.36)+exp((_v+236.8)/69.33));
+T xk1ss = 1.0/(1.0+exp(-(v+2.5538*{ko_}+144.59)/(1.5692*{ko_}+3.8115)));
+T txk1  = 122.2/(exp((-(v+127.2))/20.36)+exp((v+236.8)/69.33));
 _xk1    = xk1ss-(xk1ss-xk1)*exp(-dt/txk1);
-T rk1   = 1.0/(1.0+exp((_v+105.8-2.6*{ko_})/9.493));
+T rk1   = 1.0/(1.0+exp((v+105.8-2.6*{ko_})/9.493));
 T GK1   = 0.1908;
 #ifdef CELLTYPE_EPI
 GK1*=1.2;
@@ -215,7 +191,7 @@ GK1*=1.2;
 #ifdef CELLTYPE_M
 GK1*=1.3;
 #endif
-T IK1   = GK1*sqrt({ko_})*rk1*_xk1*(_v-EK);
+T IK1   = GK1*sqrt({ko_})*rk1*_xk1*(v-EK);
 
 //NaCa ion current
 T kna1    = 15.0;
@@ -229,8 +205,8 @@ T kcaon   = 1.5e6;
 T kcaoff  = 5.0e3;
 T qna     = 0.5224;
 T qca     = 0.1670;
-T hca     = exp((qca*_v*{frdy_})/({R_}*temp));
-T hna     = exp((qna*_v*{frdy_})/({R_}*temp));
+T hca     = exp((qca*v*{frdy_})/({R_}*temp));
+T hna     = exp((qna*v*{frdy_})/({R_}*temp));
 T h1      = 1+nai/kna3*(1+hna);
 T h2      = (nai*hna)/(kna3*h1);
 T h3      = 1.0/h1;
@@ -327,8 +303,8 @@ T k4m    = 40.0;
 T Knai0  = 9.073;
 T Knao0  = 27.78;
 T delta  = -0.1550;
-T Knai   = Knai0*exp((delta*_v*{frdy_})/(3.0*{R_}*temp));
-T Knao   = Knao0*exp(((1.0-delta)*_v*{frdy_})/(3.0*{R_}*temp));
+T Knai   = Knai0*exp((delta*v*{frdy_})/(3.0*{R_}*temp));
+T Knao   = Knao0*exp(((1.0-delta)*v*{frdy_})/(3.0*{R_}*temp));
 T Kki    = 0.5;
 T Kko    = 0.3582;
 T MgADP  = 0.05;
@@ -368,12 +344,12 @@ Pnak*=0.7;
 T INaK   = Pnak*({zna_}*JnakNa+{zk_}*JnakK);
 
 // Kb ion current
-T xkb = 1.0/(1.0+exp(-(_v-14.48)/18.34));
+T xkb = 1.0/(1.0+exp(-(v-14.48)/18.34));
 T GKb = 0.003;
 #ifdef CELLTYPE_EPI
 GKb*=0.6;
 #endif
-T IKb = GKb*xkb*(_v-EK);
+T IKb = GKb*xkb*(v-EK);
 
 // Nab ion current
 T PNab = 3.75e-10;
@@ -406,6 +382,8 @@ T Jrel_inf  = a_rel*(-ICaL)/(1.0+pow(1.5/cajsr,8.0));
 Jrel_inf*=1.7;
 #endif
 T tau_rel   = bt/(1.0+0.0123/cajsr);
+T maskPosi;
+T maskNega;
 maskPosi    = (tau_rel > 0.005) * 1;
 maskNega    = (tau_rel <= 0.005) * 1;
 tau_rel     = maskNega * 0.005 + maskPosi * tau_rel;
