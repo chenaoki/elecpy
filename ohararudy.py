@@ -5,10 +5,23 @@ import chainer
 import chainer.functions as F
 from chainer import cuda, Function, FunctionSet, Variable
 from chainer.functions.connection.convolution_2d import convolution_2d
+from optparse import OptionParser
 xp = cuda.cupy
 
 from const_ORd import const_d
 import os
+
+parser = OptionParser()
+parser.add_option(
+      '-i','--time_interval',
+      dest='time_interval', action='store', type='float', default='200.0',
+      help="time interval of stimulation")
+parser.add_option(
+      '-t','--temperature',
+      dest='temp', action='store', type='int', default=310,
+      help="temperature of cell")
+
+(options, args) = parser.parse_args()
 
 params = [ 'v', 'temp', 'dt',  'CaMKt',  'nai',  'nass',  'ki',  'kss',  'cai',
            'cass',  'm',  'hf',  'hs',  'j',  'jp',  'hsp',  'mL',  'hL',  'hLp',
@@ -64,8 +77,8 @@ if __name__ == '__main__':
   dt = const_d['dt_']                      # Time step (ms)
   st_train  = 20                            # Number of Beats
   st_start = 10.                           # Time to begin stim (ms)
-  st_amp = -40                            # Stim amplitude (uA/cm^2)
-  st_inter = 200.                          # Basic Cycle Length (ms)
+  st_amp = -80                            # Stim amplitude (uA/cm^2)
+  st_inter = options.time_interval        # Basic Cycle Length (ms)
   st_dur = .5                              # Stim duration (ms)
   st_time = 0.0                            # Past time of stimulation (ms)
   st_on = False                            # Stimulation flag
@@ -73,6 +86,7 @@ if __name__ == '__main__':
 
   # Cell state initialization
   cell_state = createCellState((1,1))
+  cell_state[params.index('temp')] = options.temp
   #print '-------------'
   #for j, (key, param) in enumerate(zip(params, cell_state)) :
   #  print j, key, param[0,0]
@@ -101,10 +115,8 @@ if __name__ == '__main__':
     # State transition
     cell_state = list(ohararudy().forward(tuple(cell_state)))
 
-    # Membrane voltage update
-    cell_state[params.index('v')] -= cell_state[params.index('it')] * dt
-
-    if not os.path.isdir('./result/ORd_cell_pacing') : os.mkdir('./result/ORd_cell_pacing')
+    if not os.path.isdir('./result/ORd_cell_pacing/interval%d_temp%d' % (options.time_interval, options.temp)):
+      os.mkdir('./result/ORd_cell_pacing/interval%d_temp%d' % (options.time_interval, options.temp))
 
     if step % log_interval == 0:
       cnt += 1
@@ -113,7 +125,7 @@ if __name__ == '__main__':
       print 'it:',cell_state[params.index('it')][0,0]
       print 'st:',cell_state[params.index('st')][0,0]
       log_v[step/log_interval] = cell_state[params.index('v')][0,0]
-      saveCellState('./result/ORd_cell_pacing/{0:05}'.format(cnt), cell_state)
+      saveCellState(('./result/ORd_cell_pacing/interval%d_temp%d/{0:05}'.format(cnt)) % (options.time_interval, options.temp), cell_state)
 
     t += dt
 
