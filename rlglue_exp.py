@@ -29,7 +29,7 @@ while epi_learn < epi_max:
   totalSteps = RLGlue.RL_num_steps()
   totalReward = RLGlue.RL_return()
   epi += 1
-  print "{0} steps, total reward{1}".format(totalSteps, totalReward)
+  print "{0} steps, total reward {1}".format(totalSteps, totalReward)
 
   if np.mod(epi_learn, 100) == 0 and epi_learn != 0:
     print "SAVE CURRENT MODEL"

@@ -60,10 +60,16 @@ for param in sim_params['stimulation']:
 
 Sv           = 1400                  # Surface-to-volume ratio (cm^-1) 
 Cm           = 1.0                   # Membrane capacitance (uF/cm^2)
-sigma_l_i    = 3.75                  # (mS/cm)
-sigma_t_i    = 1.5                   # (mS/cm)
-sigma_l_e    = 3.75                  # (mS/cm) 
-sigma_t_e    = 3.00                  # (mS/cm)
+
+# sigma_l_i    = 3.75                  # (mS/cm)
+# sigma_t_i    = 1.5                   # (mS/cm)
+# sigma_l_e    = 3.75                  # (mS/cm) 
+# sigma_t_e    = 3.00                  # (mS/cm)
+
+sigma_l_i    = 1.74                  # (mS/cm)
+sigma_t_i    = 0.19                  # (mS/cm)
+sigma_l_e    = 6.25                  # (mS/cm) 
+sigma_t_e    = 2.36                  # (mS/cm)
 
 fig = plt.figure(figsize=(5,5))
 im = plt.imshow(

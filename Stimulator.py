@@ -147,7 +147,7 @@ if __name__ == '__main__':
   def sim():
     t = 0.0
     t_end = 2000.0
-    dt =10
+    dt =1
     i_ext_e = np.zeros((im_h,im_w),dtype=np.float32)
     while t < t_end:
       i_ext_e[:,:] = 0.0

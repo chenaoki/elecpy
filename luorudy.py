@@ -58,17 +58,17 @@ if __name__ == '__main__':
 
   t = 0.                                   # Time (ms)
   dt = const_d['dt_']                      # Time step (ms)
-  st_train  = 1                            # Number of Beats
+  st_train  = 20                           # Number of Beats
   st_start = 10.                           # Time to begin stim (ms)
-  st_amp = -100                            # Stim amplitude (uA/cm^2)
-  st_inter = 250.                          # Basic Cycle Length (ms)
+  st_amp = -40                             # Stim amplitude (uA/cm^2)
+  st_inter = 200.                          # Basic Cycle Length (ms)
   st_dur = .5                              # Stim duration (ms)
   st_time = 0.0                            # Past time of stimulation (ms)
   st_on = False                            # Stimulation flag 
   steps = int((st_inter*st_train)/dt)      # Number of loop
   
   # Cell state initialization
-  cell_state = createCellState((50,50))
+  cell_state = createCellState((1,1))
   #print '-------------'
   #for j, (key, param) in enumerate(zip(params, cell_state)) : 
   #  print j, key, param[0,0]
@@ -77,6 +77,7 @@ if __name__ == '__main__':
   log_v = np.zeros((steps/log_interval))
   
   start = time.time()
+  cnt = 0
   
   for step in range(steps):
   #for step in range(1):
@@ -100,14 +101,18 @@ if __name__ == '__main__':
     cell_state[params.index('v')] -= cell_state[params.index('it')] * dt 
 
     if step % log_interval == 0:
-      print '-------------{0}(ms)'.format(int(t))
+      cnt += 1
+      # print '-------------{0}(ms)'.format(int(t))
+      print '-------------{0}'.format(cnt)
       print 'v:',cell_state[params.index('v')][0,0] 
       print 'it:',cell_state[params.index('it')][0,0]
       print 'st:',cell_state[params.index('st')][0,0]
       log_v[step/log_interval] = cell_state[params.index('v')][0,0] 
+      saveCellState('./result/cell_pacing/{0:0>5}'.format(cnt), cell_state)
 
     t += dt 
 
   elapsed_time = time.time() - start
   print 'elapsed_time:', elapsed_time
   np.save('log_v', log_v)
+

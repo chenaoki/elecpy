@@ -23,12 +23,12 @@ from luorudy import createCellState, loadCellState, saveCellState
 from luorudy import params as lr_params
 from cmap_bipolar import bipolar
 from Stimulator import Stimulator
+from numpy.random import *
 
 import sys
 from opmap.opmap import RawCam, VmemMap, PhaseMap, PhaseVarianceMap, CoreMap
 
 class ElecpyEnvironment(Environment):
-  obsImageSie = 50
 
   def __init__(self, options):
 
@@ -52,8 +52,8 @@ class ElecpyEnvironment(Environment):
     self.sigma_t_i  = sim_params['conductivity']['sigma_i']['tran']  #1.5    # (mS/cm)
     self.sigma_l_e  = sim_params['conductivity']['sigma_e']['long']  #3.75   # (mS/cm) 
     self.sigma_t_e  = sim_params['conductivity']['sigma_e']['tran']  #3.00   # (mS/cm)
-    self.gameList   = sim_params['games']
-    self.stim_pnts  = sim_params['stim_pnts']
+    self.param_game   = sim_params['game']
+    self.param_stim = sim_params['stimulation']
 
     self.sigma_l    = self.sigma_l_e + self.sigma_l_i
     self.sigma_t    = self.sigma_t_e + self.sigma_t_i
@@ -70,47 +70,63 @@ class ElecpyEnvironment(Environment):
     self.vmem       = np.zeros((self.im_h,self.im_w),dtype=np.float32)
     self.vmem       = self.cell_state[lr_params.index('v')].get()
 
+  def calcPenalty(self, path, frame_end):
+    cam = RawCam(
+      path='{0}'.format(path),
+      cam_type='numpy',
+      image_width=self.im_w,
+      image_height=self.im_h,
+      frame_start=0,
+      frame_end=frame_end
+    )
+    vmem = VmemMap(cam)
+    pmap = PhaseMap(vmem)
+    pvmap = PhaseVarianceMap(pmap)
+    coremap = CoreMap(pvmap)
+    im_core, pnts_core = coremap.getFrameCore(-1)
+    penalty = 0
+    for p in pnts_core : penalty += ( self.im_w - p[1] )# x-axis position
+    return im_core, penalty
+
   def game_setup(self):
     
-    if self.gameIndex < len(self.gameList):
+    if self.gameIndex < self.param_game["num"]:
 
-      game = self.gameList[self.gameIndex]
-      # print "[Env] game", self.gameIndex, json.dumps( game, indent=4),
-
+      print "game {0}".format(self.gameIndex),
       self.savedir    = self.options.savepath + '/episode{0}'.format(self.cntEpi) 
       if not os.path.isdir(self.savedir) : os.mkdir(self.savedir)
       self.savedir    += '/game{0}'.format(self.gameIndex) 
       if not os.path.isdir(self.savedir) : os.mkdir(self.savedir)
+
+      path     = self.param_game["path"]
+      start    = self.param_game["start"]
+      end      = self.param_game["end"]
+      duration = self.param_game["duration"]
+
+      while True:
+        now = randint(start, end)
+        self.time_end = now + duration
+        im_core_org, self.penalty_org = self.calcPenalty(
+          self.param_game["path"], 
+          self.time_end)
+        if np.max(im_core_org) == 1: 
+          np.save('{0}/coremap_org'.format(self.savedir), im_core_org)
+          break      
       
-      self.phie       = np.load('{path}/phie_{start:0>4}.npy'.format(**game))
-      self.vmem       = np.load('{path}/vmem_{start:0>4}.npy'.format(**game))
-      self.cell_state = loadCellState('{path}/cell_{start:0>4}'.format(**game))
-      self.time_end   = game["end"]
-      self.cnt_udt    = game["start"] * self.cnt_log
+      self.phie       = np.load('{0}/phie_{1:0>4}.npy'.format(path, now))
+      self.vmem       = np.load('{0}/vmem_{1:0>4}.npy'.format(path, now))
+      self.cell_state = loadCellState('{0}/cell_{1:0>4}'.format(path, now))
+      self.cnt_udt    = now * self.cnt_log
       self.t          = self.cnt_udt * self.udt
       self.run_udt    = True
       self.flg_st     = False
       self.cnt_st_off = 0
       self.gameIndex += 1
       self.stims      = []
-
-      # Phase variance
-      cam = RawCam(
-        path='{path}'.format(**game),
-        cam_type='numpy',
-        image_width=self.im_w,
-        image_height=self.im_h,
-        frame_start=0,
-        frame_end=int(game["start"])
-      )
-      vmem = VmemMap(cam)
-      pmap = PhaseMap(vmem)
-      pvmap = PhaseVarianceMap(pmap)
-      coremap = CoreMap(pvmap)
-      im_core, pnts_core = coremap.getFrameCore(-1)
-      np.save('{0}/coremap_org'.format(self.savedir), im_core)
-      self.penalty_org = 0
-      for p in pnts_core : self.penalty_org += p[1] # x-axis position
+      elec = self.param_stim["electrodeSize"]
+      self.obsOrg = np.array([
+        randint(elec, self.im_h - self.obsSize - elec),
+        randint(elec, self.im_w - self.obsSize - elec)])
 
       return self.gameIndex
 
@@ -118,22 +134,22 @@ class ElecpyEnvironment(Environment):
       return -1
 
   def createObservation(self):
-    if self.obsImageSie != self.im_h:
-      obs = Observation(
-        numDoubles = self.obsImageSie * self.obsImageSie) 
-      tmp = scipy.misc.imresize(self.vmem, (self.obsImageSie, self.obsImageSie)) 
-      obs.doubleArray = list(tmp.flatten()) 
-    else:
-      obs = Observation(numDoubles = self.im_h * self.im_w) 
-      obs.doubleArray = list(self.vmem.flatten()) 
+    obs = Observation(numDoubles = self.obsSize**2) 
+    tmp = self.vmem[
+      int(self.obsOrg[0]):int(self.obsOrg[0]+self.obsSize),
+      int(self.obsOrg[1]):int(self.obsOrg[1]+self.obsSize)
+    ]
+    obs.doubleArray = list(tmp.flatten()) 
     return obs
-
 
   def env_init(self):
     print "[Env] init ...",
-    assert self.obsImageSie > 0
-    taskSpec = str(self.obsImageSie)
-    self.cntEpi = 0
+     
+    size = int(self.param_stim["arraySize"])
+    num  = int(self.param_stim["arrayNum"])
+    self.obsSize = (num-1) * size
+
+    # Display
     fig = plt.figure(figsize=(5,5))
     self.im = plt.imshow(
         np.zeros((self.im_h,self.im_w),dtype=np.float32), 
@@ -142,6 +158,10 @@ class ElecpyEnvironment(Environment):
         interpolation='nearest')
     plt.axis('off')
     plt.pause(.01)
+    
+    taskSpec = str(self.obsSize)
+    self.cntEpi = 0
+
     print "done"
     return taskSpec 
 
@@ -168,21 +188,29 @@ class ElecpyEnvironment(Environment):
     # Action control
     numAction = action.intArray[0]
     print 'action {0},'.format(numAction),
-    assert numAction <= len( self.stim_pnts['locations'] )
+    assert numAction < 10 and numAction >= 0
     if numAction > 0:
       stim_param = {}
       stim_param['name'] = 'point'
       stim_param['start'] = self.t
-      stim_param['duration'] = self.stim_pnts['duration']
+      stim_param['duration'] = self.param_stim['duration']
       stim_param['interval'] = 1000 # long enough 
-      stim_param['amplitude'] = self.stim_pnts['amplitude']
-      stim_param['shape'] = [self.im_h, self.im_w] 
-      location = self.stim_pnts['locations'][numAction-1]
-      stim_param['size'] = [location[0], location[1], self.stim_pnts['size']]
+      stim_param['amplitude'] = self.param_stim['amplitude']
+      stim_param['shape'] = [self.im_h, self.im_w]
+      pos_y = (numAction-1) / 3
+      pos_x = (numAction-1) % 3
+      stim_param['size'] = [
+        self.obsOrg[0] + int(pos_y * self.obsSize / 2), 
+        self.obsOrg[1] + int(pos_x * self.obsSize / 2), 
+        self.param_stim['electrodeSize']
+      ]
       self.stims.append(Stimulator(**stim_param))
 
     # Interval event
-    t_end = time_start + self.stim_pnts['intervalTime'] if len(self.stims) < self.stim_pnts['maxcnt'] else self.time_end
+    if len(self.stims) < self.param_stim['maxcnt']:
+      t_end = time_start + self.param_stim['interval']
+    else:
+      t_end = self.time_end
     while self.t < t_end:
 
       self.t = self.cnt_udt * self.udt
@@ -257,23 +285,10 @@ class ElecpyEnvironment(Environment):
     terminal = False
     if flg_error or self.t >= self.time_end:
 
-      cam = RawCam(
-        path=self.savedir,
-        cam_type='numpy',
-        image_width=self.im_w,
-        image_height=self.im_h,
-        frame_start=0,
-        frame_end=-1
-      )
-      vmem = VmemMap(cam)
-      pmap = PhaseMap(vmem)
-      pvmap = PhaseVarianceMap(pmap)
-      coremap = CoreMap(pvmap)
-      im_core, pnts_core = coremap.getFrameCore(-1)
-      np.save('{0}/coremap_dst'.format(self.savedir, self.t), coremap)
-      self.penalty_dst = 0
-      for p in pnts_core : self.penalty_dst += p[1] # x-axis position
-      
+      cnt_save = self.cnt_udt // self.cnt_log
+      im_core_dst, self.penalty_dst = self.calcPenalty(self.savedir, -1)
+      np.save('{0}/coremap_dst'.format(self.savedir), im_core_dst)
+
       reward = self.penalty_org - self.penalty_dst
       print 'reward:{0}'.format(reward),
 
