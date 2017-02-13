@@ -62,10 +62,10 @@ if __name__ == '__main__':
 
   t = 0.                                   # Time (ms)
   dt = const_d['dt_']                      # Time step (ms)
-  st_train  = 1                            # Number of Beats
+  st_train  = 20                            # Number of Beats
   st_start = 10.                           # Time to begin stim (ms)
-  st_amp = -100                            # Stim amplitude (uA/cm^2)
-  st_inter = 250.                          # Basic Cycle Length (ms)
+  st_amp = -40                            # Stim amplitude (uA/cm^2)
+  st_inter = 200.                          # Basic Cycle Length (ms)
   st_dur = .5                              # Stim duration (ms)
   st_time = 0.0                            # Past time of stimulation (ms)
   st_on = False                            # Stimulation flag
