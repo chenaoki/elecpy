@@ -112,14 +112,15 @@ const_d = {
   'Q10REL_'  : 1.68,
 
   # Shift in steady-state (in)activation curves [mV/K]
-  'SINFM_' : 0.8,
+  'SINFM_'  : 0.8,
   'SINFHJ_' : 0.7,
   'SINFXR_' : -1.16,
 
   # Q10 for time constant of (in)activation
   'Q10TAUMHJ_' : 2.79,
-  'Q10TAUD_' : 2.52,
-  'Q10TAUF_' : 2.82,
-  'Q10TAUXR_' : 6.25,
-  'Q10TAUXS_' : 2.58,
+  'Q10TAUD_'   : 2.52,
+  'Q10TAUF_'   : 2.82,
+  'Q10TAUBG_'  : 2.5,
+  'Q10TAUXR_'  : 6.25,
+  'Q10TAUXS_'  : 2.58,
 }
