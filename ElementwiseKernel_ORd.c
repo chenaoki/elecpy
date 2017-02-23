@@ -37,18 +37,18 @@ T vfrt  = _v*{frdy_}/({R_}*temp);
 
 //Na ion current
 T mss   = 1.0/(1.0+exp((-(_v+39.57))/9.871));
-T tm    = 1.0/(6.765*exp((_v+11.64)/34.77)+8.552*exp(-(_v+77.42)/5.955)) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T tm    = 1.0/(6.765*exp((_v+11.64)/34.77)+8.552*exp(-(_v+77.42)/5.955)) / pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
 _m      = mss-(mss-m)*exp(-dt/tm);
 T hss   = 1.0/(1+exp((v+82.90)/6.086));
-T thf   = 1.0/(1.432e-5*exp(-(_v+1.196)/6.285)+6.149*exp((_v+0.5096)/20.27)) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
-T ths   = 1.0/(0.009794*exp(-(_v+17.95)/28.05)+0.3343*exp((_v+5.730)/56.66)) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T thf   = 1.0/(1.432e-5*exp(-(_v+1.196)/6.285)+6.149*exp((_v+0.5096)/20.27)) / pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T ths   = 1.0/(0.009794*exp(-(_v+17.95)/28.05)+0.3343*exp((_v+5.730)/56.66)) / pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
 T Ahf   = 0.99;
 T Ahs   = 1.0-Ahf;
 _hf     = hss-(hss-hf)*exp(-dt/thf);
 _hs     = hss-(hss-hs)*exp(-dt/ths);
 T h     = Ahf*_hf+Ahs*_hs;
 T jss   = hss;
-T tj    = 2.038+1.0/(0.02136*exp(-(_v+100.6)/8.281)+0.3052*exp((_v+0.9941)/38.45)) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T tj    = 2.038+1.0/(0.02136*exp(-(_v+100.6)/8.281)+0.3052*exp((_v+0.9941)/38.45)) / pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
 _j      = jss-(jss-j)*exp(-dt/tj);
 T hssp  = 1.0/(1+exp((_v+89.1)/6.086));
 T thsp  = 3.0*ths;
@@ -119,11 +119,11 @@ T Ito          = Gto*(_v-EK)*((1.0-fItop)*_a*c+fItop*_ap*ip);
 
 // Ca ion current
 T dss     = 1.0/(1.0+exp((-(_v+3.940))/4.230));
-T td      = 0.6+1.0/(exp(-0.05*(_v+6.0))+exp(0.09*(_v+14.0))) * pow({Q10TAUD_}, (temp-{temp_})/10.0);
+T td      = 0.6+1.0/(exp(-0.05*(_v+6.0))+exp(0.09*(_v+14.0))) / pow({Q10TAUD_}, (temp-{temp_})/10.0);
 _d        = dss-(dss-d)*exp(-dt/td);
 T fss     = 1.0/(1.0+exp((_v+19.58)/3.696));
-T tff     = 7.0+1.0/(0.0045*exp(-(_v+20.0)/10.0)+0.0045*exp((_v+20.0)/10.0)) * pow({Q10TAUF_}, (temp-{temp_})/10.0);
-T tfs     = 1000.0+1.0/(0.000035*exp(-(_v+5.0)/4.0)+0.000035*exp((_v+5.0)/6.0)) * pow({Q10TAUF_}, (temp-{temp_})/10.0);
+T tff     = 7.0+1.0/(0.0045*exp(-(_v+20.0)/10.0)+0.0045*exp((_v+20.0)/10.0)) / pow({Q10TAUF_}, (temp-{temp_})/10.0);
+T tfs     = 1000.0+1.0/(0.000035*exp(-(_v+5.0)/4.0)+0.000035*exp((_v+5.0)/6.0)) / pow({Q10TAUF_}, (temp-{temp_})/10.0);
 T Aff     = 0.6;
 T Afs     = 1.0-Aff;
 _ff       = fss-(fss-ff)*exp(-dt/tff);
@@ -172,8 +172,8 @@ T ICaK     = (1.0-fICaLp)*PCaK*PhiCaK*_d*(f*(1.0-_nca)+_jca*fca*_nca)+fICaLp*PCa
 
 // IKr ion current
 T xrss = 1.0/(1.0+exp((-(_v+8.337))/6.789));
-T txrf = 12.98+1.0/(0.3652*exp((_v-31.66)/3.869)+4.123e-5*exp((-(_v-47.78))/20.38)) * pow({Q10TAUXR_}, (temp-{temp_})/10.0);
-T txrs = 1.865+1.0/(0.06629*exp((_v-34.70)/7.355)+1.128e-5*exp((-(_v-29.74))/25.94)) * pow({Q10TAUXR_}, (temp-{temp_})/10.0);
+T txrf = 12.98+1.0/(0.3652*exp((_v-31.66)/3.869)+4.123e-5*exp((-(_v-47.78))/20.38)) / pow({Q10TAUXR_}, (temp-{temp_})/10.0);
+T txrs = 1.865+1.0/(0.06629*exp((_v-34.70)/7.355)+1.128e-5*exp((-(_v-29.74))/25.94)) / pow({Q10TAUXR_}, (temp-{temp_})/10.0);
 T Axrf = 1.0/(1.0+exp((_v+54.81)/38.21));
 T Axrs = 1.0-Axrf;
 _xrf   = xrss-(xrss-xrf)*exp(-dt/txrf);
@@ -191,10 +191,10 @@ T IKr  = GKr*sqrt({ko_}/5.4)*xr*rkr*(_v-EK);
 
 // IKs ion current
 T xs1ss = 1.0/(1.0+exp((-(_v+11.60))/8.932));
-T txs1  = 817.3+1.0/(2.326e-4*exp((_v+48.28)/17.80)+0.001292*exp((-(_v+210.0))/230.0)) * pow({Q10TAUXS_}, (temp-{temp_})/10.0);
+T txs1  = 817.3+1.0/(2.326e-4*exp((_v+48.28)/17.80)+0.001292*exp((-(_v+210.0))/230.0)) / pow({Q10TAUXS_}, (temp-{temp_})/10.0);
 _xs1    = xs1ss-(xs1ss-xs1)*exp(-dt/txs1);
 T xs2ss = xs1ss;
-T txs2  = 1.0/(0.01*exp((_v-50.0)/20.0)+0.0193*exp((-(_v+66.54))/31.0)) * pow({Q10TAUXS_}, (temp-{temp_})/10.0);
+T txs2  = 1.0/(0.01*exp((_v-50.0)/20.0)+0.0193*exp((-(_v+66.54))/31.0)) / pow({Q10TAUXS_}, (temp-{temp_})/10.0);
 _xs2    = xs2ss-(xs2ss-xs2)*exp(-dt/txs2);
 T KsCa  = 1.0+0.6/(1.0+pow(3.8e-5/cai,1.4));
 T GKs   = 0.0034;
