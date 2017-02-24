@@ -20,6 +20,10 @@ parser.add_option(
       '-t','--temperature',
       dest='temp', action='store', type='int', default=310,
       help="temperature of cell")
+parser.add_option(
+      '-s','--save_dir',
+      dest='save_dir', action='store', type='str', default=None,
+      help="save directory")
 
 (options, args) = parser.parse_args()
 
@@ -115,8 +119,12 @@ if __name__ == '__main__':
     # State transition
     cell_state = list(ohararudy().forward(tuple(cell_state)))
 
-    if not os.path.isdir('./result/ORd_cell_pacing/interval%d_temp%d' % (options.time_interval, options.temp)):
-      os.mkdir('./result/ORd_cell_pacing/interval%d_temp%d' % (options.time_interval, options.temp))
+    if options.save_dir is None:
+      save_dir = './result/ORd_cell_pacing/interval%d_temp%d' % (options.time_interval, options.temp)
+    else:
+      save_dir = options.save_dir
+    if not os.path.isdir(save_dir):
+      os.mkdir(save_dir)
 
     if step % log_interval == 0:
       cnt += 1
@@ -125,7 +133,7 @@ if __name__ == '__main__':
       print 'it:',cell_state[params.index('it')][0,0]
       print 'st:',cell_state[params.index('st')][0,0]
       log_v[step/log_interval] = cell_state[params.index('v')][0,0]
-      saveCellState(('./result/ORd_cell_pacing/interval%d_temp%d/{0:05}'.format(cnt)) % (options.time_interval, options.temp), cell_state)
+      saveCellState(os.path.join(save_dir, '{0:05}'.format(cnt)), cell_state)
 
     t += dt
 
