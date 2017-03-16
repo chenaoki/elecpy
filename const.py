@@ -7,7 +7,9 @@ const_d = {
   'dt_'          : 0.001          , # Time step (ms)    
   'm_'           : 0.000642       , # Na activation    
   'h_'           : 0.996271       , # Na inactivation  
-  'j_'           : 0.997286       , # Na inactivation  
+  'j_'           : 0.997286       , # Na inactivation
+  'd_'           : 0.000003       , # Ca inactivation  
+  'f_'           : 0.999745       , # Ca inactivation  
   'xr_'          : 0.0001096      , # Rapidly Activating K time-dependant activation
   'b_'           : 0.000880231    , # T-Type Ca Voltage dependant activation gate
   'g_'           : 0.994305       , # T-Type Ca Voltage dependant inactivation gate
@@ -22,7 +24,7 @@ const_d = {
   'nsr_'         : 2.553          , # NSR Ca Concentration (mM)
   'jsr_'         : 2.479          , # JSR Ca Concentration (mM) 
   'csqn_'        : 7.56           , # Calsequestrin Buffered Ca Concentration (mM) 
-  'ical_'        : 0.0            , # Ca current through L-type Ca channel (uA/uF)
+  'ilca_'        : 0.0            , # Ca current through L-type Ca channel (uA/uF)
   'ilcana_'      : 0.0            , # Na current through L-type Ca channel (uA/uF) 
   'ilcak_'       : 0.0            , # K current through L-type Ca channel (uA/uF)
   'irel_'        : 0.0            , # SR Ca Release
@@ -116,6 +118,7 @@ const_d = {
   'pna_' : 0.000008265 , # Permiability of membrane to Na (cm/s)
   'pca_' : 0.006615    , # Permiability of membrane to Ca (cm/s)
   'pk_' : 0.000002363  , # Permiability of membrane to K (cm/s)
+  'kmca_' : 0.0006     ,
   'gacai_' : 0.01      , # Activity coefficient of Ca
   'gacao_' : 0.341     , # Activity coefficient of Ca
   'ganai_' : 0.75      , # Activity coefficient of Na
@@ -164,6 +167,7 @@ const_d = {
   'Q10TAUMHJ_' : 2.79,
   'Q10TAUD_' : 2.52,
   'Q10TAUF_' : 2.82,
+  'Q10TAUBG_' : 2.5,
   'Q10TAUXR_' : 6.25,
   'Q10TAUXS_' : 2.58,
 
