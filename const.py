@@ -7,7 +7,7 @@ const_d = {
   'dt_'          : 0.001          , # Time step (ms)    
   'm_'           : 0.000642       , # Na activation    
   'h_'           : 0.996271       , # Na inactivation  
-  'j_'           : 0.997286       , # Na inactivation  
+  'j_'           : 0.997286       , # Na inactivation
   'xr_'          : 0.0001096      , # Rapidly Activating K time-dependant activation
   'b_'           : 0.000880231    , # T-Type Ca Voltage dependant activation gate
   'g_'           : 0.994305       , # T-Type Ca Voltage dependant inactivation gate
@@ -22,7 +22,7 @@ const_d = {
   'nsr_'         : 2.553          , # NSR Ca Concentration (mM)
   'jsr_'         : 2.479          , # JSR Ca Concentration (mM) 
   'csqn_'        : 7.56           , # Calsequestrin Buffered Ca Concentration (mM) 
-  'ical_'        : 0.0            , # Ca current through L-type Ca channel (uA/uF)
+  'ilca_'        : 0.0            , # Ca current through L-type Ca channel (uA/uF)
   'ilcana_'      : 0.0            , # Na current through L-type Ca channel (uA/uF) 
   'ilcak_'       : 0.0            , # K current through L-type Ca channel (uA/uF)
   'irel_'        : 0.0            , # SR Ca Release
