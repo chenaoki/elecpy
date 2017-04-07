@@ -116,6 +116,7 @@ const_d = {
   'pna_' : 0.000008265 , # Permiability of membrane to Na (cm/s)
   'pca_' : 0.006615    , # Permiability of membrane to Ca (cm/s)
   'pk_' : 0.000002363  , # Permiability of membrane to K (cm/s)
+  'kmca_' : 0.0006     ,
   'gacai_' : 0.01      , # Activity coefficient of Ca
   'gacao_' : 0.341     , # Activity coefficient of Ca
   'ganai_' : 0.75      , # Activity coefficient of Na
@@ -164,6 +165,7 @@ const_d = {
   'Q10TAUMHJ_' : 2.79,
   'Q10TAUD_' : 2.52,
   'Q10TAUF_' : 2.82,
+  'Q10TAUBG_' : 2.5,
   'Q10TAUXR_' : 6.25,
   'Q10TAUXS_' : 2.58,
 
