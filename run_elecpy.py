@@ -2,7 +2,6 @@ import subprocess
 import glob
 import os
 
-
 ## Continue simulation for visualization
 
 subprocess.call('python elecpy.py -p params/batch/param_-3.0_0.json -r 2540 -s E:/ExperimentData/20170111-30 -d E:/ExperimentData/20170111-30')
