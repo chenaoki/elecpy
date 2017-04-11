@@ -25,7 +25,7 @@ _maskNega = ( _maskPosi == 0 ) * 1;
 _v = _maskPosi * (-30.0-0.00001) + _maskNega * _v;
 
 // reversible potential
-T _ena = (1.00000/{F_}/({R_}*temp))*log({nao_}/nai);
+T _ena = (1.00000/({F_}/({R_}*temp)))*log({nao_}/nai);
 T _ek =  (1.00000/({F_}/({R_}*temp)))*log({ko_}/{ki_});
 T _eks = (1.00000/({F_}/({R_}*temp)))*log(({ko_}+{prNaK_}*{nao_})/({ki_}+{prNaK_}*nai));
 
@@ -43,41 +43,37 @@ T _gNaK = {gNaK_} * pow({Q10NAK_}, (temp-{temp_})/10.0);
 // INa current
 _maskPosi = (_v <= -40.0) * 1;
 _maskNega = (_v >  -40.0) * 1;
-T _ah = (0.135000*exp((80.0000+_v)/-6.80000) * _maskPosi + 0 *_maskNega) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
-T _bh = (3.56000*exp(0.0790000*_v)+ 310000.*exp(0.350000*_v) * _maskPosi +
-         1.00000/(0.130000*(1.00000+exp((_v+10.6600)/-11.1000))) * _maskNega) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
-T _aj = (((-127140.*exp(0.244400*_v)-3.47400e-05*exp(-0.0439100*_v))*1.00000*(_v+37.7800))/(1.00000+exp(0.311000*(_v+79.2300))) * _maskPosi +
+T _ah = ((0.135000*exp((80.0000+_v)/-6.80000)) * _maskPosi + 0 * _maskNega) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T _bh = ((3.56000*exp(0.0790000*_v)+310000.*exp(0.350000*_v)) * _maskPosi +
+         (1.00000/(0.130000*(1.00000+exp((_v+10.6600)/-11.1000)))) * _maskNega) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T _aj = ((((-127140.*exp(0.244400*_v)-3.47400e-05*exp(-0.0439100*_v))*1.00000*(_v+37.7800))/(1.00000+exp(0.311000*(_v+79.2300)))) * _maskPosi +
          0 * _maskNega) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
-T _bj = ((0.121200*exp(-0.0105200*_v))/(1.00000+exp(-0.137800*(_v+40.1400))) * _maskPosi +
-         (0.300000*exp(-2.53500e-07*_v))/(1.00000+exp(-0.100000*(_v+32.0000))) * _maskNega) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
-_maskNega = (_v > -47.1301) * 1;
-_maskNega *= (_v < -47.1299) * 1;
-_maskPosi = (_maskNega == 0) * 1;
-T _am = ((0.320000*1.00000*(_v+47.1300))/(1.00000-exp(-0.100000*(_v+47.1300))) * _maskPosi +
-         3.20000 * _maskNega) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T _bj = (((0.121200*exp(-0.0105200*_v))/(1.00000+exp(-0.137800*(_v+40.1400)))) * _maskPosi +
+         ((0.300000*exp(-2.53500e-07*_v))/(1.00000+exp(-0.100000*(_v+32.0000)))) * _maskNega) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+_maskPosi = (fabs(_v+47.1300) > 0.00100000) * 1;
+_maskNega = (_maskPosi == 0) * 1;
+T _am = (((0.320000*1.00000*(_v+47.1300))/(1.00000-exp(-0.100000*(_v+47.1300)))) * _maskPosi +
+         (3.20000 * _maskNega)) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
 T _bm = (0.0800000*exp(-_v/11.0000)) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
 
 // IKs current
 T _xs1ss = 1.00000/(1.00000+exp(-(_v-1.50000)/16.7000));
-_maskPosi = (_v >= -30-0.00100000/0.0687000) * 1;
-_maskPosi *= (_v <=-30+0.00100000/0.0687000) * 1;
+_maskPosi = (fabs(_v+30.0000)<0.00100000/0.0687000) * 1;
 _maskNega = (_maskPosi == 0) * 1;
-T _tauxs1 = (1.00000/(7.19000e-05/0.148000+0.000131000/0.0687000) * _maskPosi +
-             1.00000/((7.19000e-05*(_v+30.0000))/(1.00000-exp(-0.148000*(_v+30.0000)))+(0.000131000*(_v+30.0000))/(exp(0.0687000*(_v+30.0000))-1.00000)) * _maskNega) * pow({Q10TAUXS_}, (temp-{temp_})/10.0);
+T _tauxs1 = ((1.00000/(7.19000e-05/0.148000+0.000131000/0.0687000)) * _maskPosi +
+             (1.00000/((7.19000e-05*(_v+30.0000))/(1.00000-exp(-0.148000*(_v+30.0000)))+(0.000131000*(_v+30.0000))/(exp(0.0687000*(_v+30.0000))-1.00000))) * _maskNega) * pow({Q10TAUXS_}, (temp-{temp_})/10.0);
 T _xs2ss = _xs1ss;
 T _tauxs2 =  4.00000*_tauxs1;
 
 // IKr current
-_maskNega = (_v >= -7-0.00100000/0.0687000) * 1;
-_maskNega *= (_v <= -7+0.00100000/0.0687000) * 1;
-_maskPosi = (_maskNega == 0) * 1;
-T _xkrv1 = (0.00138000*1.00000*(_v+7.00000))/(1.00000-exp(-0.123000*(_v+7.00000))) * _maskPosi +
-           0.00138000/0.123000 * _maskNega;
-_maskNega = (_v >= -10-0.00100000) * 1;
-_maskNega *= (_v <= -10+0.00100000) * 1;
-_maskPosi = (_maskNega == 0) * 1;
-T _xkrv2 = (0.000610000*1.00000*(_v+10.0000))/(exp( 0.145000*(_v+10.0000))-1.00000) * _maskPosi +
-           0.000610000/0.145000 * _maskNega;
+_maskPosi = (fabs(_v+7.00000)>0.00100000) * 1;
+_maskNega = (_maskPosi == 0) * 1;
+T _xkrv1 = ((0.00138000*1.00000*(_v+7.00000))/(1.00000-exp(-0.123000*(_v+7.00000)))) * _maskPosi +
+           (0.00138000/0.123000) * _maskNega;
+_maskPosi = (fabs(_v+10.0000)>0.00100000) * 1;
+_maskNega = (_maskPosi == 0) * 1;
+T _xkrv2 = ((0.000610000*1.00000*(_v+10.0000))/(exp( 0.145000*(_v+10.0000))-1.00000)) * _maskPosi +
+           (0.000610000/0.145000) * _maskNega;
 T _taukr = (1.00000/(_xkrv1+_xkrv2)) * pow({Q10TAUXR_}, (temp-{temp_})/10.0);
 T _xkrinf = 1.00000/(1.00000+exp(-(_v+50.0000)/7.50000));
 
@@ -134,33 +130,27 @@ _maskPosi *= (jsr<{cstar_}) * 1;
 _maskNega = (_maskPosi == 0) * 1;
 _NegaPosi = _maskNega * (jsr >={cstar_}) * 1;
 _NegaNega = _maskNega * (_NegaPosi == 0) * 1;
-T _Qr0 = (jsr - 50.0000)/1.00000 * _maskPosi + {av_}*jsr+{bv_} * _NegaPosi + 0 * _NegaNega;
+T _Qr0 = ((jsr - 50.0000)/1.00000) * _maskPosi + ({av_}*jsr+{bv_}) * _NegaPosi + 0 * _NegaNega;
 T _Qr = (nsr*_Qr0)/{cstar_};
 T _csm = submem/1000.00;
-T _za =  _v*2.00000*{F_}/({R_}*temp);
-_maskPosi = (_za<0.00100000) * 1;
-_maskPosi *= (_za>-0.00100000) * 1;
+T _za =  _v*2.00000*({F_}/({R_}*temp));
+_maskPosi = (fabs(_za)<0.00100000) * 1;
 _maskNega = (_maskPosi == 0) * 1;
-T _rxa = (4.00000*{pca_}*{F_}*{F_}/({R_}*temp)*(_csm*exp(_za)-0.341000*{cao_}))/( 2.00000*{F_}/({R_}*temp)) * _maskPosi +
-         (4.00000*{pca_}*_v*{F_}*{F_}/({R_}*temp)*(_csm*exp(_za)-0.341000*{cao_}))/(exp(_za) - 1.00000) * _maskNega;
+T _rxa = ((4.00000*{pca_}*{F_}*({F_}/({R_}*temp))*(_csm*exp(_za)-0.341000*{cao_}))/(2.00000*({F_}/({R_}*temp)))) * _maskPosi +
+  ((4.00000*{pca_}*_v*{F_}*({F_}/({R_}*temp))*(_csm*exp(_za)-0.341000*{cao_}))/(exp(_za) - 1.00000)) * _maskNega;
 T _sparkV = exp(-{ay_}*(_v+30.0000))/(1.00000+exp(-{ay_}*(_v+30.0000)));
-_maskPosi = (_rxa >= 0) * 1;
-_maskNega = (_rxa < 0) * 1;
-T _rxa2 = _rxa * _maskPosi -_rxa * _maskNega;
+T _rxa2 = fabs(_rxa);
 T _sparkrate = ({gryr_}/1.00000)*_po*_rxa2*_sparkV;
 T _xirp = (((_po*_Qr*_rxa2*{gbarsr_})/1.00000)*exp(-{ax_}*(_v+30.0000)))/(1.00000+exp(-{ax_}*(_v+30.0000)));
 T _xicap = _po*{gdyad_}*_rxa2;
 T _xiryr = _xirp+_xicap;
 T _jca =  _gca*_po*_rxa;
 T _aloss = 1.00000/(1.00000+pow({xkdna_}/submem, 3.00000));
-//
-T _zw3 = pow(nai, 3)*{cao_}*exp(_v*0.350000*{F_}/({R_}*temp)) - pow({nao_}, 3.00000)*_csm*exp(_v*(0.350000-1.00000)*{F_}/({R_}*temp));
+T _zw3 = pow(nai, 3)*{cao_}*exp(_v*0.350000*({F_}/({R_}*temp))) - pow({nao_}, 3.00000)*_csm*exp(_v*(0.350000-1.00000)*({F_}/({R_}*temp)));
 T _zw4 = 1.00000+0.200000*exp(_v*(0.350000-1.00000)*{F_}/({R_}*temp));
-//
 T _yz1 = {xmcao_}*pow(nai, 3)+pow({xmnao_}, 3.00000)*_csm;
 T _yz2 = pow({xmnai_}, 3.00000)*{cao_}*(1.00000+_csm/{xmcai_});
 T _yz3 = {xmcai_}*pow({nao_}, 3.00000)*(1.00000+pow(nai/{xmnai_}, 3.00000));
-//
 T _yz4 = pow(nai, 3)*{cao_}+ pow({nao_}, 3.00000)*_csm;
 T _zw8 = _yz1+_yz2+_yz3+_yz4;
 T _jNaCa = (_gNaCa*_aloss*_zw3)/(_zw4*_zw8);
@@ -169,7 +159,7 @@ T _spxs = ({srmax_}*{srkd_})/(({srkd_}+submem)*({srkd_}+submem));
 T _mempxs = ({bmem_}*{kmem_})/(({kmem_}+submem)*({kmem_}+submem));
 T _sarpxs = ({bsar_}*{ksar_})/(({ksar_}+submem)*({ksar_}+submem));
 T _dcsib = 1.00000/(1.00000+_bpxs+_spxs+_mempxs+_sarpxs);
-T _fNaK = 1.00000/(1.00000+0.124500*exp(-0.100000*_v*{F_}/({R_}*temp))+0.0365000*{sigma_}*exp(-_v*{F_}/({R_}*temp)));
+T _fNaK = 1.00000/(1.00000+0.124500*exp(-0.100000*_v*({F_}/({R_}*temp)))+0.0365000*{sigma_}*exp(-_v*({F_}/({R_}*temp))));
 T _xiNaK = (((_gNaK*_fNaK*nai)/(nai+{xkmnai_}))*{ko_})/({ko_}+{xkmko_});
 T _xiNaCa = {wca_}*_jNaCa;
 T _xina = _gna*h*j*m*m*m*(_v - _ena);
