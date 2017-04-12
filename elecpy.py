@@ -38,12 +38,16 @@ parser.add_option(
     help="Isolated mode")
 parser.add_option(
     '-m','--model',
-    dest='model', action='store', default='ORd',
-    help="select simulation model (ORd model(2011) or LRd model(2007))")
+    dest='model', action='store', default='Mahajan',
+    help="select simulation model (ORd model(2011) or LRd model(2007) or Mahajan model(2008))")
 
 (options, args) = parser.parse_args()
 print options.param_file
 if not os.path.isdir(options.savepath) : os.mkdir(options.savepath)
+if options.model == 'Mahajan':
+  from mahajan import mahajan as model
+  from mahajan import createCellState, loadCellState, saveCellState
+  from mahajan import params as model_params
 if options.model == 'ORd':
   from ohararudy import ohararudy as model
   from ohararudy import createCellState, loadCellState, saveCellState

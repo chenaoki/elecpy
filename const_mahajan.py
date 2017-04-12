@@ -134,5 +134,5 @@ const_d = {
   'Q10TAUBG_' : 2.5,
   'Q10TAUXR_' : 6.25,
   'Q10TAUXS_' : 2.58,
-
+  'Q10OTHER_' : 2.50,
 }
