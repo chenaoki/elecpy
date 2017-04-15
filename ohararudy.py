@@ -11,22 +11,6 @@ xp = cuda.cupy
 from const_ORd import const_d
 import os
 
-parser = OptionParser()
-parser.add_option(
-      '-i','--time_interval',
-      dest='time_interval', action='store', type='float', default='200.0',
-      help="time interval of stimulation")
-parser.add_option(
-      '-t','--temperature',
-      dest='temp', action='store', type='int', default=310,
-      help="temperature of cell")
-parser.add_option(
-      '-s','--save_dir',
-      dest='save_dir', action='store', type='str', default=None,
-      help="save directory")
-
-(options, args) = parser.parse_args()
-
 params = [ 'v', 'temp', 'dt',  'CaMKt',  'nai',  'nass',  'ki',  'kss',  'cai',
            'cass',  'm',  'hf',  'hs',  'j',  'jp',  'hsp',  'mL',  'hL',  'hLp',
            'a',  'iF',  'iS',  'ap',  'iFp',  'iSp',  'd',  'ff',  'fs',  'fcaf',
@@ -70,6 +54,22 @@ if __name__ == '__main__':
 
   print 'OharaRudy model on chainer'
   print 'Unit test : pacing'
+
+  parser = OptionParser()
+  parser.add_option(
+    '-i','--time_interval',
+    dest='time_interval', action='store', type='float', default='200.0',
+    help="time interval of stimulation")
+  parser.add_option(
+    '-t','--temperature',
+    dest='temp', action='store', type='int', default=310,
+    help="temperature of cell")
+  parser.add_option(
+    '-s','--save_dir',
+    dest='save_dir', action='store', type='str', default=None,
+    help="save directory")
+
+  (options, args) = parser.parse_args()
 
   #print const_d
   #print params

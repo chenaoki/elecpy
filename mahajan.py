@@ -11,22 +11,6 @@ xp = cuda.cupy
 from const_mahajan import const_d
 import os
 
-parser = OptionParser()
-parser.add_option(
-  '-i','--time_interval',
-  dest='time_interval', action='store', type='float', default='400.0',
-  help="time interval of stimulation")
-parser.add_option(
-  '-t','--temperature',
-  dest='temp', action='store', type='int', default=310,
-  help="temperature of cell")
-parser.add_option(
-  '-s','--save_dir',
-  dest='save_dir', action='store', type='str', default=None,
-  help="save directory")
-
-(options, args) = parser.parse_args()
-
 params = [ 'v', 'temp', 'dt',  'm',  'h',  'j',  'dyad',
            'c1',  'c2',  'xi1ca',  'xi1ba',  'xi2ca',  'xi2ba',
            'xr',  'cai',  'xs1',  'xs2',  'xtos',  'xtof',
@@ -70,6 +54,22 @@ if __name__ == '__main__':
 
   print 'Mahajan model on chainer'
   print 'Unit test : pacing'
+
+  parser = OptionParser()
+  parser.add_option(
+    '-i','--time_interval',
+    dest='time_interval', action='store', type='float', default='400.0',
+    help="time interval of stimulation")
+  parser.add_option(
+    '-t','--temperature',
+    dest='temp', action='store', type='int', default=310,
+    help="temperature of cell")
+  parser.add_option(
+    '-s','--save_dir',
+    dest='save_dir', action='store', type='str', default=None,
+    help="save directory")
+
+  (options, args) = parser.parse_args()
 
   #print const_d
   #print params
