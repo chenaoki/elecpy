@@ -15,7 +15,9 @@ params = [ 'v', 'temp', 'dt',  'm',  'h',  'j',  'dyad',
            'c1',  'c2',  'xi1ca',  'xi1ba',  'xi2ca',  'xi2ba',
            'xr',  'cai',  'xs1',  'xs2',  'xtos',  'xtof',
            'ytos',  'ytof', 'nai',  'submem',  'nsr',  'jsr',
-           'xir',  'tropi',  'trops',  'it',  'st']
+           'xir',  'tropi',  'trops',  'it',  'st',
+           'xina',  'xik1',  'xikr',  'xiks',  'xito',  'xitof',  'xitos',
+           'xiNaCa',  'xica',  'xiNaK']
 
 string_args = ''
 string_rets = ''
@@ -62,7 +64,7 @@ if __name__ == '__main__':
     help="time interval of stimulation")
   parser.add_option(
     '-t','--temperature',
-    dest='temp', action='store', type='int', default=310,
+    dest='temp', action='store', type='int', default=308,
     help="temperature of cell")
   parser.add_option(
     '-s','--save_dir',
@@ -79,7 +81,7 @@ if __name__ == '__main__':
 
   t = 0.                                   # Time (ms)
   dt = const_d['dt_']                      # Time step (ms)
-  st_train  = 20                           # Number of Beats
+  st_train  = 1                           # Number of Beats
   st_start = 10.                           # Time to begin stim (ms)
   st_amp = -15                             # Stim amplitude (uA/cm^2)
   st_inter = options.time_interval         # Basic Cycle Length (ms)
