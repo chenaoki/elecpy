@@ -4,7 +4,7 @@ const_d = {
 
   # Initial values of variables
   'v_'           : -87.169816169406  , # Membrane voltage
-  'temp_'        : 310               , # Temperature (K)
+  'temp_'        : 308               , # Temperature (K)
   'dt_'          : 0.001             , # Time step (ms)
   'm_'           : 0.001075453357    , # Na activation
   'h_'           : 0.990691306716    , # Na inactivation
@@ -34,6 +34,16 @@ const_d = {
   'trops_'       : 19.864701949854   , #
   'it_'          : 0.0               , # total ion current
   'st_'          : 0.0               , # Stimulus current (uA/cm^2)
+  'xina_'        : 0.0               , #
+  'xik1_'        : 0.0               , #
+  'xikr_'        : 0.0               , #
+  'xiks_'        : 0.0               , #
+  'xito_'        : 0.0               , #
+  'xitof_'       : 0.0               , #
+  'xitos_'       : 0.0               , #
+  'xiNaCa_'      : 0.0               , #
+  'xica_'        : 0.0               , #
+  'xiNaK_'       : 0.0               , #
 
   # Initial values of constants
   'vth_'         : 0.0               , #
@@ -76,7 +86,7 @@ const_d = {
   'taud_'        : 4.0               , #
   'cstar_'       : 90.0              , #
   'av_'          : 11.3              , #
-  'bv_'          : -977.0            , #
+  'bv_'          : 977.0             , #
   'pca_'         : 0.00054           , #
   'F_'           : 96.4853415        , #
   'R_'           : 8.314472          , #
