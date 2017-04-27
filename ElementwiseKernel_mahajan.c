@@ -6,23 +6,50 @@ T _NegaNega;
 _v = v;
 
 // voltage trapping to avoid error
-_maskPosi =  ( _v < 0.00001 ) * 1;
+_maskPosi =  ( _v < 0.0001 ) * 1;
 _maskPosi *= ( _v >= 0 ) * 1;
 _maskNega = ( _maskPosi == 0 ) * 1;
-_v = _maskPosi * 0.00001 + _maskNega * _v;
-_maskPosi =  ( _v > -0.00001 ) * 1;
+_v = _maskPosi * 0.0001 + _maskNega * _v;
+_maskPosi =  ( _v > -0.0001 ) * 1;
 _maskPosi *= ( _v <= 0 ) * 1;
 _maskNega = ( _maskPosi == 0 ) * 1;
-_v = _maskPosi * -0.00001 + _maskNega * _v;
+_v = _maskPosi * -0.0001 + _maskNega * _v;
 
-_maskPosi =  ( _v < (-30.0+0.00001) ) * 1;
+_maskPosi =  ( _v < (-47.1300+0.0001) ) * 1;
+_maskPosi *= ( _v >= -47.1300 ) * 1;
+_maskNega = ( _maskPosi == 0 ) * 1;
+_v = _maskPosi * (-47.1300+0.0001)+ _maskNega * _v;
+_maskPosi =  ( _v > (-47.1300 -0.0001) ) * 1;
+_maskPosi *= ( _v <= -47.1300 ) * 1;
+_maskNega = ( _maskPosi == 0 ) * 1;
+_v = _maskPosi * (-47.13-0.0001) + _maskNega * _v;
+
+_maskPosi =  ( _v < (-30.0+0.0001) ) * 1;
 _maskPosi *= ( _v >= -30.0 ) * 1;
 _maskNega = ( _maskPosi == 0 ) * 1;
-_v = _maskPosi * (-30.0+0.00001)+ _maskNega * _v;
-_maskPosi =  ( _v > (-30.0 -0.00001) ) * 1;
+_v = _maskPosi * (-30.0+0.0001)+ _maskNega * _v;
+_maskPosi =  ( _v > (-30.0 -0.0001) ) * 1;
 _maskPosi *= ( _v <= -30.0 ) * 1;
 _maskNega = ( _maskPosi == 0 ) * 1;
-_v = _maskPosi * (-30.0-0.00001) + _maskNega * _v;
+_v = _maskPosi * (-30.0-0.0001) + _maskNega * _v;
+
+_maskPosi =  ( _v < (-7.0+0.0001) ) * 1;
+_maskPosi *= ( _v >= -7.0 ) * 1;
+_maskNega = ( _maskPosi == 0 ) * 1;
+_v = _maskPosi * (-7.0+0.0001)+ _maskNega * _v;
+_maskPosi =  ( _v > (-7.0 -0.0001) ) * 1;
+_maskPosi *= ( _v <= -7.0 ) * 1;
+_maskNega = ( _maskPosi == 0 ) * 1;
+_v = _maskPosi * (-7.0-0.0001) + _maskNega * _v;
+
+_maskPosi =  ( _v < (-10.0+0.0001) ) * 1;
+_maskPosi *= ( _v >= -10.0 ) * 1;
+_maskNega = ( _maskPosi == 0 ) * 1;
+_v = _maskPosi * (-10.0+0.0001)+ _maskNega * _v;
+_maskPosi =  ( _v > (-10.0 -0.0001) ) * 1;
+_maskPosi *= ( _v <= -10.0 ) * 1;
+_maskNega = ( _maskPosi == 0 ) * 1;
+_v = _maskPosi * (-10.0-0.0001) + _maskNega * _v;
 
 // reversible potential
 T _ena = (1.00000/({F_}/({R_}*temp)))*log({nao_}/nai);
@@ -50,17 +77,12 @@ T _aj = ((((-127140.*exp(0.244400*_v)-3.47400e-05*exp(-0.0439100*_v))*1.00000*(_
          0 * _maskNega) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
 T _bj = (((0.121200*exp(-0.0105200*_v))/(1.00000+exp(-0.137800*(_v+40.1400)))) * _maskPosi +
          ((0.300000*exp(-2.53500e-07*_v))/(1.00000+exp(-0.100000*(_v+32.0000)))) * _maskNega) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
-_maskPosi = (fabs(_v+47.1300) > 0.00100000) * 1;
-_maskNega = (_maskPosi == 0) * 1;
-T _am = (((0.320000*1.00000*(_v+47.1300))/(1.00000-exp(-0.100000*(_v+47.1300)))) * _maskPosi + (3.20000 * _maskNega)) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T _am = ((0.320000*1.00000*(_v+47.1300))/(1.00000-exp(-0.100000*(_v+47.1300)))) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
 T _bm = (0.0800000*exp(-_v/11.0000)) * pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
 
 // IKs current
 T _xs1ss = 1.00000/(1.00000+exp(-(_v-1.50000)/16.7000));
-_maskPosi = (fabs(_v+30.0000)<0.00100000/0.0687000) * 1;
-_maskNega = (_maskPosi == 0) * 1;
-T _tauxs1 = ((1.00000/(7.19000e-05/0.148000+0.000131000/0.0687000)) * _maskPosi +
-             (1.00000/((7.19000e-05*(_v+30.0000))/(1.00000-exp(-0.148000*(_v+30.0000)))+(0.000131000*(_v+30.0000))/(exp(0.0687000*(_v+30.0000))-1.00000))) * _maskNega) / pow({Q10TAUXS_}, (temp-{temp_})/10.0);
+T _tauxs1 = (1.00000/((7.19000e-05*(_v+30.0000))/(1.00000-exp(-0.148000*(_v+30.0000)))+(0.000131000*(_v+30.0000))/(exp(0.0687000*(_v+30.0000))-1.00000))) / pow({Q10TAUXS_}, (temp-{temp_})/10.0);
 T _xs2ss = _xs1ss;
 T _tauxs2 =  4.00000*_tauxs1;
 T _gksx = 1.00000+0.800000/(1.00000+pow(0.500000/cai, 3.00000));
@@ -72,14 +94,8 @@ T _xkin = _aki/(_aki+_bki);
 
 // IKr current
 T _xkrinf = 1.00000/(1.00000+exp(-(_v+50.0000)/7.50000));
-_maskPosi = (fabs(_v+7.00000)>0.00100000) * 1;
-_maskNega = (_maskPosi == 0) * 1;
-T _xkrv1 = ((0.00138000*1.00000*(_v+7.00000))/(1.00000-exp(-0.123000*(_v+7.00000)))) * _maskPosi +
-           (0.00138000/0.123000) * _maskNega;
-_maskPosi = (fabs(_v+10.0000)>0.00100000) * 1;
-_maskNega = (_maskPosi == 0) * 1;
-T _xkrv2 = ((0.000610000*1.00000*(_v+10.0000))/(exp( 0.145000*(_v+10.0000))-1.00000)) * _maskPosi +
-           (0.000610000/0.145000) * _maskNega;
+T _xkrv1 = ((0.00138000*1.00000*(_v+7.00000))/(1.00000-exp(-0.123000*(_v+7.00000))));
+T _xkrv2 = ((0.000610000*1.00000*(_v+10.0000))/(exp( 0.145000*(_v+10.0000))-1.00000));
 T _taukr = (1.00000/(_xkrv1+_xkrv2)) / pow({Q10TAUXR_}, (temp-{temp_})/10.0);
 T _rg = 1.00000/(1.00000+exp((_v+33.0000)/22.4000));
 

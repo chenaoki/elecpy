@@ -81,7 +81,7 @@ if __name__ == '__main__':
 
   t = 0.                                   # Time (ms)
   dt = const_d['dt_']                      # Time step (ms)
-  st_train  = 1                           # Number of Beats
+  st_train  = 20                           # Number of Beats
   st_start = 10.                           # Time to begin stim (ms)
   st_amp = -15                             # Stim amplitude (uA/cm^2)
   st_inter = options.time_interval         # Basic Cycle Length (ms)
