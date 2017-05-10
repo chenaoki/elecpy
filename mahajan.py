@@ -29,7 +29,7 @@ string_rets = string_rets.rstrip(', ')
 elemwise = open('ElementwiseKernel_mahajan.c').read().format(**const_d)
 
 def createCellState(shape):
-  state = [ xp.asarray( np.ones(shape, dtype=np.float32) * const_d[param+'_'] ) for param in params ]
+  state = [ xp.asarray( np.ones(shape, dtype=np.float64) * const_d[param+'_'] ) for param in params ]
   return state
 
 def loadCellState(path):
