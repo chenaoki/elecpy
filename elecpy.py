@@ -11,7 +11,7 @@ from optparse import OptionParser
 
 from PDE import PDE
 from cmap_bipolar import bipolar
-from Stimulator import Stimulator
+from Stimulator.ExtracellularStimulator import ExtracellularStimulator
 
 cuda.get_device(0).use()
 
@@ -67,7 +67,7 @@ cnt_log      = sim_params['time']['cnt_log'] # num of udt for logging
 time_end     = sim_params['time']['end']
 stims = []
 for param in sim_params['stimulation']:
-  stim = Stimulator(**param)
+  stim = ExtracellularStimulator(**param)
   assert tuple(stim.shape) == (im_h, im_w)
   stims.append(stim)
 
