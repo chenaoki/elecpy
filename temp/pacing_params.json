@@ -1,0 +1,15 @@
+{
+    "time" : {
+        "dt" :0.01,
+        "log_cnt" : 100
+    },
+    "cell_type" : "mahajan",
+    "cell_param":{},
+    "stim" : {
+        "start": 0.0,
+        "duration": 0.5,
+        "interval": 400.0,
+        "train" : 20,
+        "amplitude": -80.0
+    }
+}
