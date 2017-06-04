@@ -9,210 +9,213 @@ from chainer import cuda
 from matplotlib import animation
 from optparse import OptionParser
 
-from PDE import PDE
-from cmap_bipolar import bipolar
-from Stimulator.ExtracellularStimulator import ExtracellularStimulator
+from solver.PDE import PDE
+from stim.ExtracellularStimulator import ExtracellularStimulator
+from stim.MembraneStimulator import MembraneStimulator
+from cell.ohararudy.model import model as cell_model_ohararudy
+from cell.luorudy.model import model as cell_model_luorudy
+from cell.mahajan.model import model as cell_model_mahajan
 
-cuda.get_device(0).use()
+sim_params = None
 
-parser = OptionParser()
-parser.add_option(
-    '-p','--param_file',
-    dest='param_file', action='store', type='string', default='./sim_params.json',
-    help="json file of simulation parameters")
-parser.add_option(
-    '-r','--restart',
-    dest='cnt_restart', action='store', type='int', default=-1,
-    help="time(ms) to restart. Set -1 to choose the last frame")
-parser.add_option(
-    '-d','--dst',
-    dest='savepath', action='store', type='string', default='./result/data',
-    help="Save data path.")
-parser.add_option(
-    '-s','--src',
-    dest='srcpath', action='store', type='string', default='./result/data',
-    help="Source data path for restart.")
-parser.add_option(
-    '-i','--isolated',
-    dest='isolated', action='store_true', default=False,
-    help="Isolated mode")
-parser.add_option(
-    '-m','--model',
-    dest='model', action='store', default='Mahajan',
-    help="select simulation model (ORd model(2011) or LRd model(2007) or Mahajan model(2008))")
+def simulate():
 
-(options, args) = parser.parse_args()
-print options.param_file
-if not os.path.isdir(options.savepath) : os.mkdir(options.savepath)
-if options.model == 'Mahajan':
-  from mahajan import mahajan as model
-  from mahajan import createCellState, loadCellState, saveCellState
-  from mahajan import params as model_params
-if options.model == 'ORd':
-  from ohararudy import ohararudy as model
-  from ohararudy import createCellState, loadCellState, saveCellState
-  from ohararudy import params as model_params
-elif options.model == 'LRd':
-  from luorudy import luorudy as model
-  from luorudy import createCellState, loadCellState, saveCellState
-  from luorudy import params as model_params
+    assert sim_params is not None
 
-with open (options.param_file,'r') as f : sim_params = json.load(f)
-with open('{0}/sim_params.json'.format(options.savepath), 'w') as f : json.dump(sim_params, f, indent=4)
-im_h         = sim_params['geometory']['height']
-im_w         = sim_params['geometory']['width']
-ds           = sim_params['geometory']['ds'] # Spatial discretization step (cm)
-udt          = sim_params['time']['udt']     # Universal time step (ms)
-cnt_log      = sim_params['time']['cnt_log'] # num of udt for logging
-time_end     = sim_params['time']['end']
-stims = []
-for param in sim_params['stimulation']:
-  stim = ExtracellularStimulator(**param)
-  assert tuple(stim.shape) == (im_h, im_w)
-  stims.append(stim)
+    print "elecpy simulation start!"
 
-Sv           = 1400                  # Surface-to-volume ratio (cm^-1)
-Cm           = 1.0                   # Membrane capacitance (uF/cm^2)
+    cuda.get_device(0).use()
 
-# sigma_l_i    = 3.75                  # (mS/cm)
-# sigma_t_i    = 1.5                   # (mS/cm)
-# sigma_l_e    = 3.75                  # (mS/cm)
-# sigma_t_e    = 3.00                  # (mS/cm)
+    # Constants
+    Sv           = 1400                  # Surface-to-volume ratio (cm^-1)
+    Cm           = 1.0                   # Membrane capacitance (uF/cm^2)
+    sigma_l_i    = 1.74                  # (mS/cm)
+    sigma_t_i    = 0.19                  # (mS/cm)
+    sigma_l_e    = 6.25                  # (mS/cm)
+    sigma_t_e    = 2.36                  # (mS/cm)
 
-sigma_l_i    = 1.74                  # (mS/cm)
-sigma_t_i    = 0.19                  # (mS/cm)
-sigma_l_e    = 6.25                  # (mS/cm)
-sigma_t_e    = 2.36                  # (mS/cm)
+    # Geometory settings
+    im_h         = sim_params['geometory']['height']
+    im_w         = sim_params['geometory']['width']
+    ds           = sim_params['geometory']['ds'] # Spatial discretization step (cm)
 
-fig = plt.figure(figsize=(5,5))
-im = plt.imshow(
-    np.zeros((im_h,im_w),dtype=np.float64),
-    vmin = -100.0, vmax = 100.0,
-    cmap=bipolar(neutral=0, lutsize=1024),
-    interpolation='nearest')
-plt.axis('off')
+    # Time settings
+    udt          = sim_params['time']['udt']     # Universal time step (ms)
+    time_end     = sim_params['time']['end']
 
-def sim( ):
+    # Logging settings
+    cnt_log      = sim_params['log']['cnt']      # num of udt for logging
+    savepath     = sim_params['log']['path']
 
-  print "elecpy start"
-  t         = 0.                           # Time (ms)
-  cnt_udt   = 0                            # Count of udt
-  dstep     = 1                            # Time step (# of udt)
-  run_udt   = True                         # Flag of running sim in udt
-  flg_st    = False
-  cnt_st_off = 0
+    # Cell model settings
+    cells = None
+    if sim_params['cell_type'] == 'ohararudy':
+        cells = cell_model_ohararudy((im_h,im_w))
+    if sim_params['cell_type'] == 'luorudy':
+        cells = cell_model_luorudy((im_h,im_w))
+    if sim_params['cell_type'] == 'mahajan':
+        cells = cell_model_mahajan((im_h,im_w))
+    assert cells is not None
 
-  # Stimulators
-  print "Allocating data...",
-  cell_state = createCellState((im_h,im_w))
-  i_ion              = np.zeros((im_h,im_w),dtype=np.float64)
-  phie               = np.zeros((im_h,im_w),dtype=np.float64)
-  i_ext_e            = np.zeros((im_h,im_w),dtype=np.float64)
-  i_ext_i            = np.zeros((im_h,im_w),dtype=np.float64)
-  rhs_phie           = np.zeros((im_h,im_w),dtype=np.float64)
-  rhs_vmem           = np.zeros((im_h,im_w),dtype=np.float64)
-  vmem               = np.zeros((im_h,im_w),dtype=np.float64)
-  vmem               = cell_state[model_params.index('v')].get()
-  if options.cnt_restart >= 0:
-    pfx = '_{0:0>4}'.format(options.cnt_restart)
-    phie = np.load('{0}/phie{1}.npy'.format(options.srcpath,pfx))
-    vmem = np.load('{0}/vmem{1}.npy'.format(options.srcpath,pfx))
-    cell_state = loadCellState('{0}/cell{1}'.format(options.srcpath,pfx))
-    cnt_udt = options.cnt_restart * cnt_log
-  print "...done"
+    # Stimulation settings
+    stims_ext = []
+    stims_mem = []
+    for param in sim_params['stimulation']['extracellular']:
+        stim = ExtracellularStimulator(**param)
+        assert tuple(stim.shape) == (im_h, im_w)
+        stims_ext.append(stim)
+    for param in sim_params['stimulation']['membrane']:
+        stim = MembraneStimulator(**param)
+        assert tuple(stim.shape) == (im_h, im_w)
+        stims_mem.append(stim)
 
-  # PDE
-  print 'Building PDE system ...',
-  sigma_l      = sigma_l_e + sigma_l_i
-  sigma_t      = sigma_t_e + sigma_t_i
-  pde_i = PDE( im_h, im_w, sigma_l_i, sigma_t_i, ds )
-  pde_m = PDE( im_h, im_w, sigma_l,   sigma_t,   ds )
-  print '...done'
+    print "Allocating data...",
+    cells.create()
+    i_ion              = np.zeros((im_h,im_w),dtype=np.float64)
+    phie               = np.zeros((im_h,im_w),dtype=np.float64)
+    i_ext_e            = np.zeros((im_h,im_w),dtype=np.float64)
+    i_ext_i            = np.zeros((im_h,im_w),dtype=np.float64)
+    rhs_phie           = np.zeros((im_h,im_w),dtype=np.float64)
+    rhs_vmem           = np.zeros((im_h,im_w),dtype=np.float64)
+    vmem               = np.copy(cells.get_param('v').get())
+    print "...done"
 
-  while t < time_end:
+    print "Initializing data...",
+    if sim_params['restart'] is not None:
+        cnt_restart = sim_params['restart']['count']
+        srcpath = sim_params['restart']['source']
+        pfx = '_{0:0>4}'.format(cnt_restart)
+        phie = np.load('{0}/phie{1}.npy'.format(srcpath,pfx))
+        vmem = np.load('{0}/vmem{1}.npy'.format(srcpath,pfx))
+        cells.load('{0}/cell{1}'.format(srcpath,pfx))
+        cnt_udt = cnt_restart * cnt_log
+    print "...done"
 
-    t = cnt_udt * udt
-    dt = dstep * udt
+    print 'Building PDE system ...',
+    sigma_l      = sigma_l_e + sigma_l_i
+    sigma_t      = sigma_t_e + sigma_t_i
+    pde_i = PDE( im_h, im_w, sigma_l_i, sigma_t_i, ds )
+    pde_m = PDE( im_h, im_w, sigma_l,   sigma_t,   ds )
+    print '...done'
 
-    # Stimulation control
-    i_ext_e[:,:] = 0.0
-    flg_st_temp = False
-    for s in stims:
-      i_ext_e += s.get_current(t)*Sv
-      flg_st_temp = flg_st_temp or s.get_flag(t)
+    # Initialization
+    t         = 0.                       # Time (ms)
+    cnt_udt   = 0                        # Count of udt
+    dstep     = 1                        # Time step (# of udt)
+    run_udt   = True                     # Flag of running sim in udt
+    flg_st    = False                    # Flaf of stimulation
+    cnt_st_off = 0
 
-    # step.1 cell state transition
-    cell_state[model_params.index('dt')][:,:] = dt
-    cell_state[model_params.index('v')]=cuda.to_gpu(vmem)
-    cell_state = list(model().forward(tuple(cell_state)))
-    i_ion = cell_state[model_params.index('it')].get()
+    print 'Main loop start!'
+    while t < time_end:
 
-    if options.isolated:
-      # Run without diffusion
-      cell_state[model_params.index('v')] -= cell_state[model_params.index('it')] * dt
-      vmem = cell_state[model_params.index('v')].get()
-    else:
+        t = cnt_udt * udt
+        dt = dstep * udt
 
-      # step.2 phie
-      rhs_phie = i_ext_e - i_ext_i - pde_i.forward(vmem)
-      pde_cnt, phie = pde_m.solve(phie, rhs_phie)
-      phie -= phie[0,0]
+        # Stimulation control
+        i_ext_e[:,:] = 0.0
+        flg_st_temp = False
+        for s in stims:
+            i_ext_e += s.get_current(t)*Sv
+            flg_st_temp = flg_st_temp or s.get_flag(t)
 
-      # step.3 vmem
-      rhs_vmem = pde_i.forward(vmem)
-      rhs_vmem += pde_i.forward(phie)
-      rhs_vmem -= i_ion * Sv
-      rhs_vmem += i_ext_i
-      rhs_vmem *= 1 / (Cm * Sv)
-      vmem += dt * rhs_vmem
+        # step.1 cell state transition
+        cells.set_param('dt', dt )
+        cells.set_param('v', cuda.to_gpu(vmem) )
+        cells.update()
+        i_ion = cells.get_param('it').get()
 
-    # Logging & error check
-    if cnt_udt%cnt_log<dstep:
-      cnt_save = cnt_udt // cnt_log
-      print '------------------{0}ms'.format(cnt_save)
-      np.save      ('{0}/phie_{1:0>4}'.format(options.savepath,cnt_save), phie)
-      np.save      ('{0}/vmem_{1:0>4}'.format(options.savepath,cnt_save), vmem)
-      saveCellState('{0}/cell_{1:0>4}'.format(options.savepath,cnt_save), cell_state)
-      yield vmem, t # for display
+        # step.2 phie
+        rhs_phie = i_ext_e - i_ext_i - pde_i.forward(vmem)
+        pde_cnt, phie = pde_m.solve(phie, rhs_phie)
+        phie -= phie[0,0]
 
-      flg = False
-      for i,v in enumerate(vmem.flatten()):
-        if v != v :
-          print "error : invalid value {1} @ {0} ms, index {2}".format(t, v, i)
-          flg = True
-          break
-      if flg is True:
-        break
+        # step.3 vmem
+        rhs_vmem = pde_i.forward(vmem)
+        rhs_vmem += pde_i.forward(phie)
+        rhs_vmem -= i_ion * Sv
+        rhs_vmem += i_ext_i
+        rhs_vmem *= 1 / (Cm * Sv)
+        vmem += dt * rhs_vmem
 
-      # Stim off count
-      if flg_st_temp is False:
-        if flg_st is True:
-          cnt_st_off = 0
+        # Logging & error check
+        if cnt_udt%cnt_log<dstep:
+            cnt_save = cnt_udt // cnt_log
+            print '------------------{0}ms'.format(cnt_save)
+            np.save('{0}/phie_{1:0>4}'.format(savepath,cnt_save), phie)
+            np.save('{0}/vmem_{1:0>4}'.format(savepath,cnt_save), vmem)
+            cells.save('{0}/cell_{1:0>4}'.format(savepath,cnt_save), cell_state)
+            yield vmem, t # for display
+
+            flg = False
+            for i,v in enumerate(vmem.flatten()):
+                if v != v :
+                    print "error : invalid value {1} @ {0} ms, index {2}".format(t, v, i)
+                    flg = True
+                    break
+            if flg is True:
+                break
+
+        # Stim off count
+        if flg_st_temp is False:
+            if flg_st is True:
+                cnt_st_off = 0
+            else:
+                cnt_st_off += 1
+            flg_st = flg_st_temp
+        print '+' if flg_st else '-',
+        print '+' if run_udt else '-'
+
+        # Time step control
+        if run_udt:
+            if cnt_st_off >= 3 and cnt_udt % 10 == 0:
+                dstep = 2
+                run_udt = False
         else:
-          cnt_st_off += 1
-      flg_st = flg_st_temp
-      print '+' if flg_st else '-',
-      print '+' if run_udt else '-'
+            if pde_cnt > 5:
+                dstep = 1
+                run_udt = True
 
-    # Time step control
-    if run_udt:
-      if cnt_st_off >= 3 and cnt_udt % 10 == 0:
-        dstep = 2
-        run_udt = False
-    else:
-      if pde_cnt > 5:
-        dstep = 1
-        run_udt = True
+        cnt_udt += dstep
 
-    cnt_udt += dstep
+    print "elecpy done"
+    exit()
 
-  print "elecpy done"
-  exit()
+if __name__ == '__main__':
 
-def draw(data):
-  img, time = data[0], data[1]
-  im.set_array(img)
-  return [im]
+    parser = OptionParser()
+    parser.add_option(
+        '-p','--param_file',
+        dest='param_file', action='store', type='string', default='./temp/sim_params.json',
+        help="json file of simulation parameters")
+    parser.add_option(
+        '-d','--dst',
+        dest='savepath', action='store', type='string', default='./temp/result/',
+        help="Save data path.")
 
-ani = animation.FuncAnimation(fig, draw, sim, blit=False, interval=200, repeat=False)
-plt.show()
+    (options, args) = parser.parse_args()
+
+    with open (options.param_file,'r') as f:
+        sim_params = json.load(f)
+    if not os.path.isdir(options.savepath) :
+        os.mkdir(options.savepath)
+    with open('{0}/sim_params.json'.format(options.savepath), 'w') as f:
+        json.dump(sim_params, f, indent=4)
+    sim_params['log']['path'] = options.savepath
+
+    from util.cmap_bipolar import bipolar
+    fig = plt.figure(figsize=(5,5))
+    im = plt.imshow(
+        np.zeros((im_h,im_w),dtype=np.float64),
+        vmin = -100.0, vmax = 100.0,
+        cmap=bipolar(neutral=0, lutsize=1024),
+        interpolation='nearest')
+    plt.axis('off')
+
+    def draw(data):
+        img, time = data[0], data[1]
+        im.set_array(img)
+        return [im]
+
+    ani = animation.FuncAnimation(fig, draw, simulate, blit=False, interval=200, repeat=False)
+    plt.show()
