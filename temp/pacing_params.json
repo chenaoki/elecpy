@@ -1,7 +1,7 @@
 {
     "time" : {
-        "dt" :0.01,
-        "log_cnt" : 100
+        "dt" :0.005,
+        "log_cnt" : 200
     },
     "cell_type" : "mahajan",
     "cell_param":{},

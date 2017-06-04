@@ -47,10 +47,10 @@ if __name__ == "__main__":
     if pacing_params["cell_type"] == 'mahajan':
         model = mahajan(shape)
 
-    model.set_param('dt', np.ones(model.shape, dtype=np.float64) * dt)
+    model.set_param('dt', dt)
     for param in pacing_params["cell_param"].keys():
         value = pacing_params["cell_param"][key]
-        model.set_param(param, np.ones(model.shape, dtype=np.float64) * value)
+        model.set_param(param, value)
 
     # Initialization
     t = 0.                                   # Time (ms)
@@ -62,18 +62,18 @@ if __name__ == "__main__":
 
     for step in range(steps):
     #for step in range(1):
-
+    
         # Stimulation setting
         if int( (t - st_start)/dt ) % int(st_inter/dt) == 0:
             st_on = True
         if st_on:
-            model.set_param('st', np.ones(shape, dtype=np.float64)*st_amp)
+            model.set_param('st', st_amp)
             st_time += dt
             if st_time > st_dur:
                 st_on = False
                 st_time = 0.0
         else: # st_on
-            model.set_param('st', np.zeros(shape, dtype=np.float64))
+            model.set_param('st', 0.)
 
         # State transition
         model.update()
@@ -85,7 +85,7 @@ if __name__ == "__main__":
             print 'v:', model.get_param('v')[0,0]
             print 'it:',model.get_param('it')[0,0]
             print 'st:',model.get_param('st')[0,0]
-            model.save(os.path.join(options.save_dir, '{0:05}'.format(cnt)))
+            model.save(os.path.join(options.savepath, '{0:0>5}'.format(cnt)))
 
         t += dt
 
