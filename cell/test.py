@@ -6,29 +6,14 @@ from luorudy.model import model as luorudy
 from ohararudy.model import model as ohararudy
 from mahajan.model import model as mahajan
 
-if __name__ == "__main__":
+def test(pacing_params, savepath):
 
     print 'cell models pacing test.'
 
     shape = (1,1)
-
-    parser = OptionParser()
-    parser.add_option(
-        '-p','--param_file',
-        dest='param_file', action='store', type='string', default='../temp/pacing_params.json',
-        help="json file of simulation parameters")
-    parser.add_option(
-        '-d','--dst',
-        dest='savepath', action='store', type='string', default='../temp/result/',
-        help="Save data path.")
-
-    (options, args) = parser.parse_args()
-
-    with open (options.param_file,'r') as f:
-        pacing_params = json.load(f)
-    if not os.path.isdir(options.savepath) :
-        os.mkdir(options.savepath)
-    with open('{0}/pacing_params.json'.format(options.savepath), 'w') as f:
+    if not os.path.isdir(savepath) :
+        os.mkdir(savepath)
+    with open('{0}/pacing_params.json'.format(savepath), 'w') as f:
         json.dump(pacing_params, f, indent=4)
 
     dt           = pacing_params["time"]["dt"]
@@ -80,14 +65,33 @@ if __name__ == "__main__":
 
         if step % log_cnt == 0:
             cnt += 1
-            # print '-------------{0}(ms)'.format(int(t))
-            print '-------------{0}'.format(cnt)
-            print 'v:', model.get_param('v')[0,0]
-            print 'it:',model.get_param('it')[0,0]
-            print 'st:',model.get_param('st')[0,0]
-            model.save(os.path.join(options.savepath, '{0:0>5}'.format(cnt)))
+            model.save(os.path.join(savepath, '{0:0>5}'.format(cnt)))
+            if cnt % 100 == 0:
+                print '-------------{0}'.format(cnt)
+                print 'v:', model.get_param('v')[0,0]
+                print 'it:',model.get_param('it')[0,0]
+                print 'st:',model.get_param('st')[0,0]
 
         t += dt
 
     elapsed_time = time.time() - start
     print 'elapsed_time:', elapsed_time
+    
+if __name__ == "__main__":
+    
+    parser = OptionParser()
+    parser.add_option(
+        '-p','--param_file',
+        dest='param_file', action='store', type='string', default='../temp/pacing_params.json',
+        help="json file of simulation parameters")
+    parser.add_option(
+        '-d','--dst',
+        dest='savepath', action='store', type='string', default='../temp/result/',
+        help="Save data path.")
+
+    (options, args) = parser.parse_args()
+
+    with open (options.param_file,'r') as f:
+        pacing_params = json.load(f)
+
+    test(pacing_params, options.savepath)

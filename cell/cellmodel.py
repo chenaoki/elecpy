@@ -69,7 +69,7 @@ class cellmodel(object):
             assert param_value.shape == self.shape
             self.state[self.params.index(param_name)] = cuda.to_gpu(param_value)
         else:
-            self.state[self.params.index(param_name)][:,:] = param_value            
+            self.state[self.params.index(param_name)][:,:] = param_value
 
     def get_param(self, param_name):
         assert param_name in self.params
