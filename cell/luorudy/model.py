@@ -55,6 +55,7 @@ class model(cellmodel):
             'ryrIthree',
             'ryrIfour',
             'ryrIfive',
+            'sponrel',
             'csqn',
             'jsr',
             'it',
