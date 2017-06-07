@@ -2,8 +2,8 @@
     "cell_type" : "mahajan",
 
     "geometory" : {
-        "height":120,
-        "width":180,
+        "height":200,
+        "width":200,
         "ds":1.5e-2
     },
 
@@ -13,20 +13,19 @@
     },
 
     "log" : {
-        "cnt_log" : 1000,
-        "path" : "temp/result"
+        "cnt" : 1000,
+        "path" : "result"
     },
 
     "stimulation" : {
         "extracellular" : [
-
             {
                 "name": "point",
                 "interval": 100.0,
                 "start": 0.0,
                 "shape": [
-                    120,
-                    180
+                    200,
+                    200
                 ],
                 "amplitude": 50.0,
                 "duration": 20.0,
@@ -37,6 +36,7 @@
                 ]
             }
         ],
-        "Membrane" : []
+        "membrane" : [
+        ]
     }
 }

@@ -15,10 +15,11 @@ from stim.MembraneStimulator import MembraneStimulator
 from cell.ohararudy.model import model as cell_model_ohararudy
 from cell.luorudy.model import model as cell_model_luorudy
 from cell.mahajan.model import model as cell_model_mahajan
+from util.cmap_bipolar import bipolar
 
 sim_params = None
 
-def simulate():
+def sim_generator():
 
     assert sim_params is not None
 
@@ -57,17 +58,22 @@ def simulate():
         cells = cell_model_mahajan((im_h,im_w))
     assert cells is not None
 
-    # Stimulation settings
+    print "Stimulation settings",
     stims_ext = []
     stims_mem = []
-    for param in sim_params['stimulation']['extracellular']:
-        stim = ExtracellularStimulator(**param)
-        assert tuple(stim.shape) == (im_h, im_w)
-        stims_ext.append(stim)
-    for param in sim_params['stimulation']['membrane']:
-        stim = MembraneStimulator(**param)
-        assert tuple(stim.shape) == (im_h, im_w)
-        stims_mem.append(stim)
+    if 'stimulation' in sim_params.keys():
+        stim_param = sim_params['stimulation']
+        if 'extracellular' in stim_param:
+            for param in stim_param['extracellular']:
+                stim = ExtracellularStimulator(**param)
+                assert tuple(stim.shape) == (im_h, im_w)
+                stims_ext.append(stim)
+        if 'membrane' in stim_param:
+            for param in stim_param['membrane']:
+                stim = MembraneStimulator(**param)
+                assert tuple(stim.shape) == (im_h, im_w)
+                stims_mem.append(stim)
+    print "...done"
 
     print "Allocating data...",
     cells.create()
@@ -77,11 +83,11 @@ def simulate():
     i_ext_i            = np.zeros((im_h,im_w),dtype=np.float64)
     rhs_phie           = np.zeros((im_h,im_w),dtype=np.float64)
     rhs_vmem           = np.zeros((im_h,im_w),dtype=np.float64)
-    vmem               = np.copy(cells.get_param('v').get())
+    vmem               = np.copy(cells.get_param('v'))
     print "...done"
 
     print "Initializing data...",
-    if sim_params['restart'] is not None:
+    if 'restart' in sim_params.keys():
         cnt_restart = sim_params['restart']['count']
         srcpath = sim_params['restart']['source']
         pfx = '_{0:0>4}'.format(cnt_restart)
@@ -115,15 +121,17 @@ def simulate():
         # Stimulation control
         i_ext_e[:,:] = 0.0
         flg_st_temp = False
-        for s in stims:
+        for s in stims_ext:
             i_ext_e += s.get_current(t)*Sv
             flg_st_temp = flg_st_temp or s.get_flag(t)
+        for s in stims_mem:
+            cells.set_param('st', s.get_current(t)) 
 
         # step.1 cell state transition
         cells.set_param('dt', dt )
         cells.set_param('v', cuda.to_gpu(vmem) )
         cells.update()
-        i_ion = cells.get_param('it').get()
+        i_ion = cells.get_param('it')
 
         # step.2 phie
         rhs_phie = i_ext_e - i_ext_i - pde_i.forward(vmem)
@@ -144,7 +152,7 @@ def simulate():
             print '------------------{0}ms'.format(cnt_save)
             np.save('{0}/phie_{1:0>4}'.format(savepath,cnt_save), phie)
             np.save('{0}/vmem_{1:0>4}'.format(savepath,cnt_save), vmem)
-            cells.save('{0}/cell_{1:0>4}'.format(savepath,cnt_save), cell_state)
+            cells.save('{0}/cell_{1:0>4}'.format(savepath,cnt_save))
             yield vmem, t # for display
 
             flg = False
@@ -163,8 +171,6 @@ def simulate():
             else:
                 cnt_st_off += 1
             flg_st = flg_st_temp
-        print '+' if flg_st else '-',
-        print '+' if run_udt else '-'
 
         # Time step control
         if run_udt:
@@ -203,7 +209,8 @@ if __name__ == '__main__':
         json.dump(sim_params, f, indent=4)
     sim_params['log']['path'] = options.savepath
 
-    from util.cmap_bipolar import bipolar
+    im_h         = sim_params['geometory']['height']
+    im_w         = sim_params['geometory']['width']
     fig = plt.figure(figsize=(5,5))
     im = plt.imshow(
         np.zeros((im_h,im_w),dtype=np.float64),
@@ -212,10 +219,17 @@ if __name__ == '__main__':
         interpolation='nearest')
     plt.axis('off')
 
-    def draw(data):
-        img, time = data[0], data[1]
-        im.set_array(img)
-        return [im]
+    g = sim_generator()
 
-    ani = animation.FuncAnimation(fig, draw, simulate, blit=False, interval=200, repeat=False)
+    def init():
+        im.set_array(np.zeros((im_h,im_w),dtype=np.float64))
+        return (im,)
+
+    def draw(data):
+        img, time = g.next() 
+        im.set_array(img)
+        return (im,) 
+
+    anim = animation.FuncAnimation(fig, draw, init_func=init, blit=False, interval=200, repeat=False)
     plt.show()
+
