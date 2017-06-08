@@ -19,6 +19,24 @@ from util.cmap_bipolar import bipolar
 
 sim_params = None
 
+def conv_cntSave2time(cnt_save):
+    udt          = sim_params['time']['udt']     # Universal time step (ms)
+    cnt_log      = sim_params['log']['cnt']      # num of udt for logging
+    return udt*cnt_log
+
+def conv_cntUdt2time(cnt_udt):
+    udt          = sim_params['time']['udt']     # Universal time step (ms)
+    return cnt_udt * udt
+
+def conv_time2cntUdt(t):
+    udt          = sim_params['time']['udt']     # Universal time step (ms)
+    return int(t/udt)
+
+def conv_time2cntSave(t):
+    udt          = sim_params['time']['udt']     # Universal time step (ms)
+    cnt_log      = sim_params['log']['cnt']      # num of udt for logging
+    return conv_time2cntUdt(t) // cnt_log 
+
 def sim_generator():
 
     assert sim_params is not None
@@ -108,6 +126,8 @@ def sim_generator():
     t         = 0.                       # Time (ms)
     cnt_udt   = 0                        # Count of udt
     dstep     = 1                        # Time step (# of udt)
+    cnt_save  = -1
+    
     run_udt   = True                     # Flag of running sim in udt
     flg_st    = False                    # Flaf of stimulation
     cnt_st_off = 0
@@ -115,7 +135,7 @@ def sim_generator():
     print 'Main loop start!'
     while t < time_end:
 
-        t = cnt_udt * udt
+        t = conv_cntUdt2time(cnt_udt)
         dt = dstep * udt
 
         # Stimulation control
@@ -147,13 +167,14 @@ def sim_generator():
         vmem += dt * rhs_vmem
 
         # Logging & error check
-        if cnt_udt%cnt_log<dstep:
-            cnt_save = cnt_udt // cnt_log
-            print '------------------{0}ms'.format(cnt_save)
+        cnt_save_now = conv_time2cntSave(t)
+        if cnt_save_now != cnt_save:
+            cnt_save = cnt_save_now
+            print '------------------{0}ms'.format(t)
             np.save('{0}/phie_{1:0>4}'.format(savepath,cnt_save), phie)
             np.save('{0}/vmem_{1:0>4}'.format(savepath,cnt_save), vmem)
             cells.save('{0}/cell_{1:0>4}'.format(savepath,cnt_save))
-            yield vmem, t # for display
+            yield vmem
 
             flg = False
             for i,v in enumerate(vmem.flatten()):
@@ -185,7 +206,6 @@ def sim_generator():
         cnt_udt += dstep
 
     print "elecpy done"
-    exit()
 
 if __name__ == '__main__':
 
@@ -226,10 +246,16 @@ if __name__ == '__main__':
         return (im,)
 
     def draw(data):
-        img, time = g.next() 
-        im.set_array(img)
-        return (im,) 
+        try:
+            vmem = g.next()
+            im.set_array(vmem)
+            return (im,)
+        except StopIteration:
+            return init()
 
-    anim = animation.FuncAnimation(fig, draw, init_func=init, blit=False, interval=200, repeat=False)
+    anim = animation.FuncAnimation(
+            fig, draw, init_func=init, 
+            save_count = conv_time2cntSave(sim_params['time']['end']),
+            blit=False, interval=50, repeat=False)
     plt.show()
 
