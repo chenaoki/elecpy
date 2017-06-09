@@ -1,5 +1,5 @@
-T _maskPosi; 
-T _maskNega; 
+T _maskPosi;
+T _maskNega;
 
 _v = v;
 
@@ -24,18 +24,25 @@ _v = _maskPosi * (-30.0-0.001) + _maskNega * _v;
 
 // comp_ina ()
 T _ena = (({R_}*temp)/{frdy_})*log({nao_}/nai);
-T _am = 0.32*(_v+47.13)/(1-exp(-0.1*(_v+47.13)));
-T _bm = 0.08*exp(-_v/11);
+T _am = (0.32*(_v+47.13)/(1-exp(-0.1*(_v+47.13))))*pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T _bm = (0.08*exp(-_v/11))*pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
 _maskPosi = (_v < -40)*1;
 _maskNega = (_v >=-40)*1;
-T _ah = 0.135*exp((80+_v)/-6.8)*_maskPosi + 0;
-T _bh = (3.56*exp(0.079*_v)+310000*exp(0.35*_v))*_maskPosi + (1/(0.13*(1+exp((_v+10.66)/-11.1)))) * _maskNega;
-T _aj = ((-127140*exp(0.2444*_v)-0.00003474*exp(-0.04391*_v))*((_v+37.78)/(1+exp(0.311*(_v+79.23))))) * _maskPosi + 0;
-T _bj = ((0.1212*exp(-0.01052*_v))/(1+exp(-0.1378*(_v+40.14))))*_maskPosi + ((0.3*exp(-0.0000002535*_v))/(1+exp(-0.1*(_v+32))))*_maskNega;
-_h = _ah/(_ah+_bh)-( (_ah/(_ah+_bh)) - h )*exp(-dt/(1/(_ah+_bh)));
-_j = _aj/(_aj+_bj)-( (_aj/(_aj+_bj)) - j )*exp(-dt/(1/(_aj+_bj)));
-_m = _am/(_am+_bm)-( (_am/(_am+_bm)) - m )*exp(-dt/(1/(_am+_bm)));
-T _ina = {gna_}*_m*_m*_m*_h*_j*(_v-_ena);
+T _ah = (0.135*exp((80+_v)/-6.8)*_maskPosi + 0)*pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T _bh = ((3.56*exp(0.079*_v)+310000*exp(0.35*_v))*_maskPosi + (1/(0.13*(1+exp((_v+10.66)/-11.1)))) * _maskNega)*pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T _aj = (((-127140*exp(0.2444*_v)-0.00003474*exp(-0.04391*_v))*((_v+37.78)/(1+exp(0.311*(_v+79.23))))) * _maskPosi + 0)*pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T _bj = (((0.1212*exp(-0.01052*_v))/(1+exp(-0.1378*(_v+40.14))))*_maskPosi + ((0.3*exp(-0.0000002535*_v))/(1+exp(-0.1*(_v+32))))*_maskNega)*pow({Q10TAUMHJ_}, (temp-{temp_})/10.0);
+T _mtau = 1 / (_am+_bm);
+T _htau = 1 / (_ah+_bh);
+T _jtau = 1 / (_aj+_bj);
+T _mss  = _am * _mtau;
+T _hss  = _ah * _htau;
+T _jss  = _aj * _jtau;
+_m = _mss - (_mss-m)*exp(-dt/_mtau);
+_h = _hss - (_hss-h)*exp(-dt/_htau);
+_j = _jss - (_jss-j)*exp(-dt/_jtau);
+T _gna = {gna_}*pow({Q10NA_}, (temp-{temp_})/10.0);
+T _ina = _gna*_m*_m*_m*_h*_j*(_v-_ena);
 
 // comp_ltypesc
 //   +- comp_rates
@@ -151,7 +158,7 @@ _ltypeO = 1-(_Czero2+_Cone2+_Ctwo2+_Cthree2+_IVf2+_IVs2);
 //bsl = {bslbar_}*(caiss/(caiss+{kmbsl_}));
 T _buffersss = 1/(1+({bsrbar_}*{kmbsr_})/(({kmbsr_}+caiss)*({kmbsr_}+caiss))+({bslbar_}*{kmbsl_})/(({kmbsl_}+caiss)*({kmbsl_}+caiss)));
 T _idiffca = (caiss-cai)/{taudiffss_};
-T _dcaresspace = dt*_buffersss*(-(ical-2*inacass)*{acap_}/({volrss_}*{frdy_}*2)+(irel*({vjsr_}/{volrss_}))-_idiffca);
+T _dcaresspace = dt*_buffersss*(-(ilca-2*inacass)*{acap_}/({volrss_}*{frdy_}*2)+(irel*({vjsr_}/{volrss_}))-_idiffca);
 _caiss = caiss+_dcaresspace;
 
 T _idiffna = (naiss-nai)/{taudiffss_};
@@ -168,33 +175,32 @@ T _ibarna = {pna_}*{zna_}*{zna_}*((_v*{frdy_}*{frdy_})/({R_}*temp))*(({ganai_}*_
 T _ibark = {pk_}*{zk_}*{zk_}*((_v*{frdy_}*{frdy_})/({R_}*temp))*(({gaki_}*_kiss*exp(({zk_}*_v*{frdy_})/({R_}*temp))-{gako_}*{ko_})/(exp(({zk_}*_v*{frdy_})/({R_}*temp))-1));
 _fcasc = _caoff/(_caon+_caoff)-((_caoff/(_caon+_caoff))-fcasc)*exp(-dt/(1/(_caon+_caoff)));
 _fmode0 = _mode0off/(_mode0on+_mode0off)-((_mode0off/(_mode0on+_mode0off))-fmode0)*exp(-dt/(1/(_mode0on+_mode0off)));
-_ical = _ibarca*_fcasc*_fmode0*ltypeO;
+_ilca = _ibarca*_fcasc*_fmode0*ltypeO*pow({Q10CAL_}, (temp-{temp_})/10.0);
 _ilcana = _ibarna*_fcasc*_fmode0*ltypeO;
 _ilcak = _ibark*_fcasc*_fmode0*ltypeO;
 
-T _ilca = _ical;
-
 // comp_icat
 T _bss = 1/(1+exp(-(_v+14)/10.8));
-T _taub = 3.7+6.1/(1+exp((_v+25)/4.5));
+T _taub = (3.7+6.1/(1+exp((_v+25)/4.5)))*pow({Q10TAUBG_}, (temp-{temp_})/10.0);
 T _gss = 1/(1+exp((_v+60)/5.6));
 _maskPosi = (_v <= 0)*1;
 _maskNega = (_v > 0)*1;
-T _taug = (-0.875*_v+12)*_maskPosi + 12*_maskNega;
+T _taug = ((-0.875*_v+12)*_maskPosi + 12*_maskNega)*pow({Q10TAUBG_}, (temp-{temp_})/10.0);
 _b = _bss - ( _bss - b )*exp(-dt/_taub);
 _g = _gss - ( _gss - g )*exp(-dt/_taug);
 
 T _eca = ({R_}*temp/(2*{frdy_}))*log({cao_}/cai);
-T _icat = {gcat_}*_b*_b*_g*(_v-_eca);
+T _gcat = {gcat_}*pow({Q10CAT_}, (temp-{temp_})/10.0);
+T _icat = _gcat*_b*_b*_g*(_v-_eca);
 
 // comp_ikr
 T _ekr = (({R_}*temp)/{frdy_})*log({ko_}/ki);
 T _xrss = 1/(1+exp(-(_v+21.5)/7.5));
-T _tauxr = 1*(1/(0.00138*(_v+14.2)/(1-exp(-0.123*(_v+14.2)))+0.00061*(_v+38.9)/(exp(0.145*(_v+38.9))-1)));
+T _tauxr = (1*(1/(0.00138*(_v+14.2)/(1-exp(-0.123*(_v+14.2)))+0.00061*(_v+38.9)/(exp(0.145*(_v+38.9))-1))))*pow({Q10TAUXR_}, (temp-{temp_})/10.0);
 _xr = _xrss-(_xrss-xr)*exp(-dt/_tauxr);
-
 T _r = 1/(1+exp((_v+9)/18.4));
-T _ikr = {gkr_}*_xr*_r*(_v-_ekr);
+T _gkr = {gkr_}*pow({Q10KR_}, (temp-{temp_})/10.0);
+T _ikr = _gkr*_xr*_r*(_v-_ekr);
 
 // comp_iks
 T _gks;
@@ -204,11 +210,11 @@ T _xs2ss;
 T _tauxs1;
 T _tauxs2;
 //if({betaad_}==0)
-_gks = 0.3031*(1+0.6/(1+pow((0.000038/cai),1.4)));
+_gks = (0.3031*(1+0.6/(1+pow((0.000038/cai),1.4))))*pow({Q10KS_}, (temp-{temp_})/10.0);
 _eks = (({R_}*temp)/{frdy_})*log(({ko_}+{prnak_}*{nao_})/(ki+{prnak_}*nai));
 _xs1ss = 1/(1+exp(-(_v-1.5)/16.7));
 _xs2ss = _xs1ss;
-_tauxs1 = 1/(0.0000719*(_v+30)/(1-exp(-0.148*(_v+30)))+0.000131*(_v+30)/(exp(0.0687*(_v+30))-1));
+_tauxs1 = (1/(0.0000719*(_v+30)/(1-exp(-0.148*(_v+30)))+0.000131*(_v+30)/(exp(0.0687*(_v+30))-1)))*pow({Q10TAUXS_}, (temp-{temp_})/10.0);
 _tauxs2 = 4*_tauxs1;
 
 //if({betaad_}==1)
@@ -232,35 +238,37 @@ T _bki = (0.49124*exp(0.08032*(_v-_eki+5.476))+exp(0.06175*(_v-_eki-594.31)))/(1
 //T _bki = 2+(0.49124*exp(0.08032*(_v-_eki+5.476))+exp(0.06175*(_v-_eki-594.31)))/(1+exp(-0.5143*(_v-_eki+4.753)));
 
 T _kin = _aki/(_aki+_bki);
-T _iki = {gki_}*_kin*(_v-_eki);
+T _gki = {gki_}*pow({Q10K1_}, (temp-{temp_})/10.0);
+T _iki = _gki*_kin*(_v-_eki);
 
 // comp_ikp
 T _ekp = _eki;
 T _kp = 1/(1+exp((7.488-_v)/5.98));
-T _ikp = {gkp_}*_kp*(_v-_ekp);
+T _gkp = {gkp_}*pow({Q10K1_}, (temp-{temp_})/10.0);
+T _ikp = _gkp*_kp*(_v-_ekp);
 
 // comp_inaca
 // Calculates Na-Ca Exchanger Current
-T _inaca = 0.8*{c1_}*exp(({gammanaca_}-1)*_v*{frdy_}/({R_}*temp))*((exp(_v*{frdy_}/({R_}*temp))*nai*nai*nai*{cao_} -1.5*{nao_}*{nao_}*{nao_}*cai)/(1+{c2_}*exp(({gammanaca_}-1)*_v*{frdy_}/({R_}*temp))*(exp(_v*{frdy_}/({R_}*temp))*nai*nai*nai*{cao_}+{c3_}*{nao_}*{nao_}*{nao_}*cai)));
-_inacass = 0.2*{c1_}*exp(({gammanaca_}-1)*_v*{frdy_}/({R_}*temp))*((exp(_v*{frdy_}/({R_}*temp))*_naiss*_naiss*_naiss*{cao_}-1.5*{nao_}*{nao_}*{nao_}*_caiss)/(1+{c2_}*exp(({gammanaca_}-1)*_v*{frdy_}/({R_}*temp))*(exp(_v*{frdy_}/({R_}*temp))*_naiss*_naiss*_naiss*{cao_}+{c3_}*{nao_}*{nao_}*{nao_}*_caiss)));
+T _inaca = (0.8*{c1_}*exp(({gammanaca_}-1)*_v*{frdy_}/({R_}*temp))*((exp(_v*{frdy_}/({R_}*temp))*nai*nai*nai*{cao_} -1.5*{nao_}*{nao_}*{nao_}*cai)/(1+{c2_}*exp(({gammanaca_}-1)*_v*{frdy_}/({R_}*temp))*(exp(_v*{frdy_}/({R_}*temp))*nai*nai*nai*{cao_}+{c3_}*{nao_}*{nao_}*{nao_}*cai))))*pow({Q10NACA_}, (temp-{temp_})/10.0);
+_inacass = (0.2*{c1_}*exp(({gammanaca_}-1)*_v*{frdy_}/({R_}*temp))*((exp(_v*{frdy_}/({R_}*temp))*_naiss*_naiss*_naiss*{cao_}-1.5*{nao_}*{nao_}*{nao_}*_caiss)/(1+{c2_}*exp(({gammanaca_}-1)*_v*{frdy_}/({R_}*temp))*(exp(_v*{frdy_}/({R_}*temp))*_naiss*_naiss*_naiss*{cao_}+{c3_}*{nao_}*{nao_}*{nao_}*_caiss))))*pow({Q10NACA_}, (temp-{temp_})/10.0);
 
 // comp_inak
 T _fnak = 1/(1+0.1245*exp((-0.1*_v*{frdy_})/({R_}*temp))+0.0365*{sigma_}*exp((-_v*{frdy_})/({R_}*temp)));
 T _inak;
 //if({betaad_}==0)
-  _inak = {ibarnak_}*_fnak*(1/(1+pow({kmnai_}/nai,2)))*({ko_}/({ko_}+{kmko_}));
+_inak = ({ibarnak_}*_fnak*(1/(1+pow({kmnai_}/nai,2)))*({ko_}/({ko_}+{kmko_})))*pow({Q10NAK_}, (temp-{temp_})/10.0);
 //if( {betaad_}==1)
 //  _inak = 1.3*{ibarnak_}*_fnak*(1/(1+pow({kmnai_}/nai,2)))*({ko_}/({ko_}+{kmko_}));
 
 // comp_ipca
-T _ipca = {ibarpca_}*(cai/(0.0005+cai))/(1+exp((-cai+0.00012)/0.00001));
+T _ipca = ({ibarpca_}*(cai/(0.0005+cai))/(1+exp((-cai+0.00012)/0.00001)))*pow({Q10K1_}, (temp-{temp_})/10.0);
 
 // comp_icab
 T _ecan = (({R_}*temp)/(2*{frdy_}))*log({cao_}/cai);
-T _icab = {gcab_}*(_v-_ecan);
+T _icab = ({gcab_}*(_v-_ecan))*pow({Q10K1_}, (temp-{temp_})/10.0);
 
 //def comp_inab
-T _inab = {gnab_}*(_v-_ena);
+T _inab = ({gnab_}*(_v-_ena))*pow({Q10K1_}, (temp-{temp_})/10.0);
 
 //def comp_it
 T _naoint = _ina+_inab+_ilcana+3*_inak+3*_inaca+3*_inacass;
@@ -281,7 +289,7 @@ _dki = -dt*(((_koint-_ilcak+st)*{acap_})/({vmyo_}*{zk_}*{frdy_})-_idiffk*({volrs
 _ki = _dki + ki;
 
 //def conc_nsr
-T _ileak = {kleak_}*nsr;
+T _ileak = {kleak_}*nsr*pow({Q10REL_}, (temp-{temp_})/10.0);
 //if({betaad_}==0)
 T _iup = {iupbar_}*cai/(cai+{kmup_});
 //if({betaad_}==1)
@@ -365,8 +373,8 @@ _maskPosi = (_expArg <= 709)*1;
 _maskNega = (_expArg >  709)*1;
 T _xpArg = _expArg*_maskPosi + 709*_maskNega;
 T _sponrelss = 25/(1+exp(_expArg));
-T _sponrel = _sponrelss-(_sponrelss-_sponrel)*exp(-dt/{spontau_});
-T _gradedrel = (1/(1+exp((20+_ical)/6))-0.034445);
+_sponrel = _sponrelss-(_sponrelss-sponrel)*exp(-dt/{spontau_});
+T _gradedrel = (1/(1+exp((20+_ilca)/6))-0.034445);
 T _vgainofrel = (1+exp(((0.015*_ibarca)+1.25)/0.75));
 T _vg = _gradedrel/_vgainofrel;
 T _grel = 250*(_vg+_sponrel);

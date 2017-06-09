@@ -2,36 +2,38 @@ import subprocess
 import glob
 import os
 
-
 ## Continue simulation for visualization
 
-subprocess.call('python elecpy.py -p params/batch/param_-3.0_0.json -r 2540 -s E:/ExperimentData/20170111-30 -d E:/ExperimentData/20170111-30')
-subprocess.call('python elecpy.py -p params/batch/param_-3.0_1.json -r 2532 -s E:/ExperimentData/20170111-31 -d E:/ExperimentData/20170111-31')
-subprocess.call('python elecpy.py -p params/batch/param_-3.0_2.json -r 2573 -s E:/ExperimentData/20170111-32 -d E:/ExperimentData/20170111-32')
+subprocess.call('python mahajan.py -i 400 -s //JALIFE/Recordings/SimulationResults/20170417-1')
+subprocess.call('python elecpy.py -d //JALIFE/Recordings/SimulationResults/20170417-2 -m Mahajan')
+#subprocess.call('python elecpy.py -r 0 -s E:/ExperimentData/20161118-1 -d //JALIFE/Recordings/SimulationResults/20170417-2 -m Mahajan')
+#subprocess.call('python elecpy.py -p params/batch/param_-3.0_0.json -r 2540 -s E:/ExperimentData/20170111-30 -d E:/ExperimentData/20170111-30')
+#subprocess.call('python elecpy.py -p params/batch/param_-3.0_1.json -r 2532 -s E:/ExperimentData/20170111-31 -d E:/ExperimentData/20170111-31')
+#subprocess.call('python elecpy.py -p params/batch/param_-3.0_2.json -r 2573 -s E:/ExperimentData/20170111-32 -d E:/ExperimentData/20170111-32')
 
-subprocess.call('python elecpy.py -p params/batch/param_-2.0_0.json -r 2550 -s E:/ExperimentData/20170111-36 -d E:/ExperimentData/20170111-36')
-subprocess.call('python elecpy.py -p params/batch/param_-2.0_1.json -r 2542 -s E:/ExperimentData/20170111-37 -d E:/ExperimentData/20170111-37')
-subprocess.call('python elecpy.py -p params/batch/param_-2.0_2.json -r 2481 -s E:/ExperimentData/20170111-38 -d E:/ExperimentData/20170111-38')
+#subprocess.call('python elecpy.py -p params/batch/param_-2.0_0.json -r 2550 -s E:/ExperimentData/20170111-36 -d E:/ExperimentData/20170111-36')
+#subprocess.call('python elecpy.py -p params/batch/param_-2.0_1.json -r 2542 -s E:/ExperimentData/20170111-37 -d E:/ExperimentData/20170111-37')
+#subprocess.call('python elecpy.py -p params/batch/param_-2.0_2.json -r 2481 -s E:/ExperimentData/20170111-38 -d E:/ExperimentData/20170111-38')
 
-subprocess.call('python elecpy.py -p params/batch/param_-1.0_0.json -r 2557 -s E:/ExperimentData/20170111-42 -d E:/ExperimentData/20170111-42')
-subprocess.call('python elecpy.py -p params/batch/param_-1.0_1.json -r 2549 -s E:/ExperimentData/20170111-43 -d E:/ExperimentData/20170111-43')
-subprocess.call('python elecpy.py -p params/batch/param_-1.0_2.json -r 2488 -s E:/ExperimentData/20170111-44 -d E:/ExperimentData/20170111-44')
+#subprocess.call('python elecpy.py -p params/batch/param_-1.0_0.json -r 2557 -s E:/ExperimentData/20170111-42 -d E:/ExperimentData/20170111-42')
+#subprocess.call('python elecpy.py -p params/batch/param_-1.0_1.json -r 2549 -s E:/ExperimentData/20170111-43 -d E:/ExperimentData/20170111-43')
+#subprocess.call('python elecpy.py -p params/batch/param_-1.0_2.json -r 2488 -s E:/ExperimentData/20170111-44 -d E:/ExperimentData/20170111-44')
 
-subprocess.call('python elecpy.py -p params/batch/param_0.0_0.json -r 2577 -s E:/ExperimentData/20170111-48 -d E:/ExperimentData/20170111-48')
-subprocess.call('python elecpy.py -p params/batch/param_0.0_1.json -r 2569 -s E:/ExperimentData/20170111-49 -d E:/ExperimentData/20170111-49')
-subprocess.call('python elecpy.py -p params/batch/param_0.0_2.json -r 2505 -s E:/ExperimentData/20170111-50 -d E:/ExperimentData/20170111-50')
+#subprocess.call('python elecpy.py -p params/batch/param_0.0_0.json -r 2577 -s E:/ExperimentData/20170111-48 -d E:/ExperimentData/20170111-48')
+#subprocess.call('python elecpy.py -p params/batch/param_0.0_1.json -r 2569 -s E:/ExperimentData/20170111-49 -d E:/ExperimentData/20170111-49')
+#subprocess.call('python elecpy.py -p params/batch/param_0.0_2.json -r 2505 -s E:/ExperimentData/20170111-50 -d E:/ExperimentData/20170111-50')
 
-subprocess.call('python elecpy.py -p params/batch/param_1.0_0.json -r 2513 -s E:/ExperimentData/20170111-15 -d E:/ExperimentData/20170111-15')
-subprocess.call('python elecpy.py -p params/batch/param_1.0_1.json -r 2505 -s E:/ExperimentData/20170111-16 -d E:/ExperimentData/20170111-16')
-subprocess.call('python elecpy.py -p params/batch/param_1.0_2.json -r 2540 -s E:/ExperimentData/20170111-17 -d E:/ExperimentData/20170111-17')
+#subprocess.call('python elecpy.py -p params/batch/param_1.0_0.json -r 2513 -s E:/ExperimentData/20170111-15 -d E:/ExperimentData/20170111-15')
+#subprocess.call('python elecpy.py -p params/batch/param_1.0_1.json -r 2505 -s E:/ExperimentData/20170111-16 -d E:/ExperimentData/20170111-16')
+#subprocess.call('python elecpy.py -p params/batch/param_1.0_2.json -r 2540 -s E:/ExperimentData/20170111-17 -d E:/ExperimentData/20170111-17')
 
 # subprocess.call('python elecpy.py -p params/batch/param_2.0_0.json -r 2526 -s E:/ExperimentData/20170111-21 -d E:/ExperimentData/20170111-21')
-subprocess.call('python elecpy.py -p params/batch/param_2.0_1.json -r 2518 -s E:/ExperimentData/20170111-22 -d E:/ExperimentData/20170111-22')
-subprocess.call('python elecpy.py -p params/batch/param_2.0_2.json -r 2557 -s E:/ExperimentData/20170111-23 -d E:/ExperimentData/20170111-23')
+#subprocess.call('python elecpy.py -p params/batch/param_2.0_1.json -r 2518 -s E:/ExperimentData/20170111-22 -d E:/ExperimentData/20170111-22')
+#subprocess.call('python elecpy.py -p params/batch/param_2.0_2.json -r 2557 -s E:/ExperimentData/20170111-23 -d E:/ExperimentData/20170111-23')
 
-subprocess.call('python elecpy.py -p params/batch/param_3.0_0.json -r 2537 -s E:/ExperimentData/20170111-27 -d E:/ExperimentData/20170111-27')
-subprocess.call('python elecpy.py -p params/batch/param_3.0_1.json -r 2529 -s E:/ExperimentData/20170111-28 -d E:/ExperimentData/20170111-28')
-subprocess.call('python elecpy.py -p params/batch/param_3.0_2.json -r 2570 -s E:/ExperimentData/20170111-29 -d E:/ExperimentData/20170111-29')
+#subprocess.call('python elecpy.py -p params/batch/param_3.0_0.json -r 2537 -s E:/ExperimentData/20170111-27 -d E:/ExperimentData/20170111-27')
+#subprocess.call('python elecpy.py -p params/batch/param_3.0_1.json -r 2529 -s E:/ExperimentData/20170111-28 -d E:/ExperimentData/20170111-28')
+#subprocess.call('python elecpy.py -p params/batch/param_3.0_2.json -r 2570 -s E:/ExperimentData/20170111-29 -d E:/ExperimentData/20170111-29')
 
 
 ## Array stimulation
