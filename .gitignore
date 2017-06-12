@@ -7,8 +7,10 @@ result/*
 .ipynb_checkpoints*
 *.sh
 *.pickle
-*.bat 
-sim_params.json 
-*.json 
+*.bat
+sim_params.json
+*.json
 stim_pattern*
 *.dat
+temp/*
+*.DS_Store

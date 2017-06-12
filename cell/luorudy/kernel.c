@@ -1,5 +1,5 @@
-T _maskPosi; 
-T _maskNega; 
+T _maskPosi;
+T _maskNega;
 
 _v = v;
 
@@ -175,7 +175,7 @@ T _ibarna = {pna_}*{zna_}*{zna_}*((_v*{frdy_}*{frdy_})/({R_}*temp))*(({ganai_}*_
 T _ibark = {pk_}*{zk_}*{zk_}*((_v*{frdy_}*{frdy_})/({R_}*temp))*(({gaki_}*_kiss*exp(({zk_}*_v*{frdy_})/({R_}*temp))-{gako_}*{ko_})/(exp(({zk_}*_v*{frdy_})/({R_}*temp))-1));
 _fcasc = _caoff/(_caon+_caoff)-((_caoff/(_caon+_caoff))-fcasc)*exp(-dt/(1/(_caon+_caoff)));
 _fmode0 = _mode0off/(_mode0on+_mode0off)-((_mode0off/(_mode0on+_mode0off))-fmode0)*exp(-dt/(1/(_mode0on+_mode0off)));
-_ical = _ibarca*_fcasc*_fmode0*ltypeO*pow({Q10CAL_}, (temp-{temp_})/10.0);
+_ilca = _ibarca*_fcasc*_fmode0*ltypeO*pow({Q10CAL_}, (temp-{temp_})/10.0);
 _ilcana = _ibarna*_fcasc*_fmode0*ltypeO;
 _ilcak = _ibark*_fcasc*_fmode0*ltypeO;
 
@@ -373,7 +373,7 @@ _maskPosi = (_expArg <= 709)*1;
 _maskNega = (_expArg >  709)*1;
 T _xpArg = _expArg*_maskPosi + 709*_maskNega;
 T _sponrelss = 25/(1+exp(_expArg));
-T _sponrel = _sponrelss-(_sponrelss-_sponrel)*exp(-dt/{spontau_});
+_sponrel = _sponrelss-(_sponrelss-sponrel)*exp(-dt/{spontau_});
 T _gradedrel = (1/(1+exp((20+_ilca)/6))-0.034445);
 T _vgainofrel = (1+exp(((0.015*_ibarca)+1.25)/0.75));
 T _vg = _gradedrel/_vgainofrel;

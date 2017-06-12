@@ -3,15 +3,15 @@ from math import exp, sqrt
 const_d = {
 
   # Initial values of variables
-  'v_'           : -86.24         , # Membrane voltage 
-  'dt_'          : 0.001          , # Time step (ms)    
-  'm_'           : 0.000642       , # Na activation    
-  'h_'           : 0.996271       , # Na inactivation  
+  'v_'           : -86.24         , # Membrane voltage
+  'dt_'          : 0.001          , # Time step (ms)
+  'm_'           : 0.000642       , # Na activation
+  'h_'           : 0.996271       , # Na inactivation
   'j_'           : 0.997286       , # Na inactivation
   'xr_'          : 0.0001096      , # Rapidly Activating K time-dependant activation
   'b_'           : 0.000880231    , # T-Type Ca Voltage dependant activation gate
   'g_'           : 0.994305       , # T-Type Ca Voltage dependant inactivation gate
-  'xs1_'         : 0.004761       , # Slowly Activating K time-dependant activation  
+  'xs1_'         : 0.004761       , # Slowly Activating K time-dependant activation
   'xs2_'         : 0.03291        , # Slowly Activating K time-dependant activation
   'nai_'         : 10.71          , # Intracellular Na (mM)
   'naiss_'       : 10.71          , # Subspace Na (mM)
@@ -20,23 +20,23 @@ const_d = {
   'ki_'          : 137.6          , # Intracellular K (mM)
   'kiss_'        : 137.6          , # Subspace K (mM)
   'nsr_'         : 2.553          , # NSR Ca Concentration (mM)
-  'jsr_'         : 2.479          , # JSR Ca Concentration (mM) 
-  'csqn_'        : 7.56           , # Calsequestrin Buffered Ca Concentration (mM) 
+  'jsr_'         : 2.479          , # JSR Ca Concentration (mM)
+  'csqn_'        : 7.56           , # Calsequestrin Buffered Ca Concentration (mM)
   'ilca_'        : 0.0            , # Ca current through L-type Ca channel (uA/uF)
-  'ilcana_'      : 0.0            , # Na current through L-type Ca channel (uA/uF) 
+  'ilcana_'      : 0.0            , # Na current through L-type Ca channel (uA/uF)
   'ilcak_'       : 0.0            , # K current through L-type Ca channel (uA/uF)
   'irel_'        : 0.0            , # SR Ca Release
   'itr_'         : 0.0            , # Translocation current of Ca ions from NSR to JSR (mM/ms)
   'inacass_'     : 0.0            , # NaCa exchanger current in the Subspace (uA/uF)
-  'fcasc_'       : 1.0            , #  
-  'fmode0_'      : 0.22           , #  
-  'ltypeCzero_'  : 0.948          , #  
-  'ltypeCone_'   : 0.052          , #  
-  'ltypeCtwo_'   : 0.0            , #  
-  'ltypeCthree_' : 0.0            , #  
-  'ltypeIVf_'    : 0.0            , #  
-  'ltypeIVs_'    : 0.0            , #  
-  'ltypeO_'      : 0.0            , #  
+  'fcasc_'       : 1.0            , #
+  'fmode0_'      : 0.22           , #
+  'ltypeCzero_'  : 0.948          , #
+  'ltypeCone_'   : 0.052          , #
+  'ltypeCtwo_'   : 0.0            , #
+  'ltypeCthree_' : 0.0            , #
+  'ltypeIVf_'    : 0.0            , #
+  'ltypeIVs_'    : 0.0            , #
+  'ltypeO_'      : 0.0            , #
   'ryrCone_'     : 0.89           , #
   'ryrCtwo_'     : 0.021          , #
   'ryrCthree_'   : 0.003          , #
@@ -47,6 +47,7 @@ const_d = {
   'ryrIthree_'   : 0.001          , #
   'ryrIfour_'    : 0.0            , #
   'ryrIfive_'    : 0.0            , #
+  'sponrel_'     : 0.0            , #
   'it_'          : 0.0            , # Total current (uA/cm^2)
   'st_'          : 0.0            , # Stimulus current (uA/cm^2)
 
@@ -55,7 +56,7 @@ const_d = {
   'frdy_' : 96485,     # Faraday's Constant (C/mol)
   'temp_' : 310  ,     # Temperature (K)
 
-  # Extracellular ion concentration 
+  # Extracellular ion concentration
   'nao_'   : 130.0          , # Extracellular Na (mM)
   'cao_'   : 1.8            , # Extracellular Ca (mM)
   'ko_'    : 4.5            , # Extracellular K (mM)
@@ -112,7 +113,7 @@ const_d = {
   'ibarpca_' : 1,        # Max. Ca current through sarcolemmal Ca pump (uA/uF)
 
   'spontau_' : 125     , # Time constant of Spontaneous Release
-  
+
   'pna_' : 0.000008265 , # Permiability of membrane to Na (cm/s)
   'pca_' : 0.006615    , # Permiability of membrane to Ca (cm/s)
   'pk_' : 0.000002363  , # Permiability of membrane to K (cm/s)
@@ -127,9 +128,9 @@ const_d = {
   'gnab_' : 0.0002     , # Max. conductance of Na background (mS/uF)
   'gcat_' : 0.005      , # Max. Conductance of the T-type Ca channel (mS/uF)
   'gna_'  : 16         , # Max. Conductance of the Na Channel (mS/uF)
-  'gkr_'   : 0.031368*sqrt(4.5/5.4), #0.031368*sqrt(ko_/5.4), 
+  'gkr_'   : 0.031368*sqrt(4.5/5.4), #0.031368*sqrt(ko_/5.4),
   'gki_'   : 0.5625*(sqrt(4.5/5.4)), #0.5625*(sqrt(ko_/5.4)),
-  
+
   'kmbsr_' : 0.00087,
   'kmbsl_':0.127,
   'kmko_' : 1.5,
