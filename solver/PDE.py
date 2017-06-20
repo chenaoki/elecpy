@@ -1,6 +1,8 @@
 import numpy as np
 import scipy.sparse as sp
 from scipy.sparse.linalg import norm
+from chainer import cuda
+import cupy as xp
 
 def getPDEMatrix(h, w, xx, yy, ds):
 
@@ -95,12 +97,11 @@ def getPDEMatrix(h, w, xx, yy, ds):
   A2=sp.csr_matrix(A2)
 
   A = A2.dot(A1)
-  Dinv = sp.csr_matrix((1/np.diag(A.todense()))[:, np.newaxis])
-  R = A - sp.csr_matrix(np.diag(np.diag(A.todense())))
 
-  #print 'A1', A1
-  #print 'A2', A2
-  #return cuda.to_gpu(A), cuda.to_gpu(R), cuda.to_gpu(D)
+  A_ = A.todense()
+  Dinv =  (1/np.diag(A_))[:, np.newaxis] 
+  R = A_ - np.diag(np.diag(A_)) 
+
   return A, R, Dinv
 
 class PDE(object):
@@ -117,18 +118,21 @@ class PDE(object):
   def solve(self, x, y, tol=1e-4, maxcnt = 300):
     assert x.shape == (self.h, self.w) 
     assert y.shape == (self.h, self.w)
-    x_old = sp.csr_matrix(x.flatten()[:, np.newaxis])
-    x_    = sp.csr_matrix(x.flatten()[:, np.newaxis])
-    y_    = sp.csr_matrix(y.flatten()[:, np.newaxis])
+    #x_old = xp.to_gpu(x.flatten()[:, np.newaxis])
+    #x_    = xp.to_gpu(x.flatten()[:, np.newaxis])
+    #y_    = xp.to_gpu(y.flatten()[:, np.newaxis])
+    x_old = x.flatten()[:, np.newaxis]
+    x_    = x.flatten()[:, np.newaxis]
+    y_    = y.flatten()[:, np.newaxis]
     error = 1e12
     cnt = 0
     while error > tol:
-      x_ = ( y_ - self.R.dot(x_old) ).multiply( self.Dinv )
-      error = norm(x_ - x_old) / norm(x_)
-      x_old = x_
-      cnt += 1
-      if cnt >= maxcnt : break
-    return cnt, np.array(x_.todense()).reshape((self.h,self.w))
+        x_ =  np.multiply( y_ - self.R.dot(x_old) , self.Dinv )
+        error = np.linalg.norm(x_ - x_old) / np.linalg.norm(x_)
+        x_old = x_
+        cnt += 1
+        if cnt >= maxcnt : break
+    return cnt, x_.reshape((self.h,self.w))
 
 if __name__ == '__main__':
 
