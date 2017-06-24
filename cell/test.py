@@ -34,7 +34,7 @@ def test(pacing_params, savepath):
 
     model.set_param('dt', dt)
     for param in pacing_params["cell_param"].keys():
-        value = pacing_params["cell_param"][key]
+        value = pacing_params["cell_param"][param]
         model.set_param(param, value)
 
     # Initialization
