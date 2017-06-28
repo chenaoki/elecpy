@@ -21,4 +21,4 @@ class Stimulator(object):
     def get_current(self, t):
         assert self._map_on is not None
         assert self._map_off is not None
-        return self._map_on if self.get_flag(t) else self._map_off
+        return self._map_on.flatten() if self.get_flag(t) else self._map_off.flatten()

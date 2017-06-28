@@ -57,6 +57,7 @@ def sim_generator():
     im_h         = sim_params['geometory']['height']
     im_w         = sim_params['geometory']['width']
     ds           = sim_params['geometory']['ds'] # Spatial discretization step (cm)
+    N            = im_h*im_w
 
     # Time settings
     udt          = sim_params['time']['udt']     # Universal time step (ms)
@@ -69,11 +70,11 @@ def sim_generator():
     # Cell model settings
     cells = None
     if sim_params['cell_type'] == 'ohararudy':
-        cells = cell_model_ohararudy((im_h,im_w))
+        cells = cell_model_ohararudy((N))
     if sim_params['cell_type'] == 'luorudy':
-        cells = cell_model_luorudy((im_h,im_w))
+        cells = cell_model_luorudy((N))
     if sim_params['cell_type'] == 'mahajan':
-        cells = cell_model_mahajan((im_h,im_w))
+        cells = cell_model_mahajan((N))
     assert cells is not None
 
     print "Stimulation settings",
@@ -95,12 +96,12 @@ def sim_generator():
 
     print "Allocating data...",
     cells.create()
-    i_ion              = np.zeros((im_h,im_w),dtype=np.float64)
-    phie               = np.zeros((im_h,im_w),dtype=np.float64)
-    i_ext_e            = np.zeros((im_h,im_w),dtype=np.float64)
-    i_ext_i            = np.zeros((im_h,im_w),dtype=np.float64)
-    rhs_phie           = np.zeros((im_h,im_w),dtype=np.float64)
-    rhs_vmem           = np.zeros((im_h,im_w),dtype=np.float64)
+    i_ion              = np.zeros((N),dtype=np.float64)
+    phie               = np.zeros((N),dtype=np.float64)
+    i_ext_e            = np.zeros((N),dtype=np.float64)
+    i_ext_i            = np.zeros((N),dtype=np.float64)
+    rhs_phie           = np.zeros((N),dtype=np.float64)
+    rhs_vmem           = np.zeros((N),dtype=np.float64)
     vmem               = np.copy(cells.get_param('v'))
     print "...done"
 
@@ -139,7 +140,7 @@ def sim_generator():
         dt = dstep * udt
 
         # Stimulation control
-        i_ext_e[:,:] = 0.0
+        i_ext_e[:] = 0.0
         flg_st_temp = False
         for s in stims_ext:
             i_ext_e += s.get_current(t)*Sv
@@ -171,13 +172,13 @@ def sim_generator():
         if cnt_save_now != cnt_save:
             cnt_save = cnt_save_now
             print '------------------{0}ms'.format(t)
-            np.save('{0}/phie_{1:0>4}'.format(savepath,cnt_save), phie)
-            np.save('{0}/vmem_{1:0>4}'.format(savepath,cnt_save), vmem)
+            np.save('{0}/phie_{1:0>4}'.format(savepath,cnt_save), phie.reshape((im_h, im_w)))
+            np.save('{0}/vmem_{1:0>4}'.format(savepath,cnt_save), vmem.reshape((im_h, im_w)))
             cells.save('{0}/cell_{1:0>4}'.format(savepath,cnt_save))
             yield vmem
 
             flg = False
-            for i,v in enumerate(vmem.flatten()):
+            for i,v in enumerate(vmem):
                 if v != v :
                     print "error : invalid value {1} @ {0} ms, index {2}".format(t, v, i)
                     flg = True
