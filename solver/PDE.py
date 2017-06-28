@@ -94,9 +94,10 @@ def getPDEMatrix(h, w, xx, yy, ds):
       A2[ ivec_real(y,x), ivec_all(y+1, x+2)] = xx/(ds**2)
   A2=sp.csr_matrix(A2)
 
-  A = A2.dot(A1)
-  Dinv = sp.csr_matrix((1/np.diag(A.todense()))[:, np.newaxis])
-  R = A - sp.csr_matrix(np.diag(np.diag(A.todense())))
+  A = A2.dot(A1) # sparse mat 
+  A_diag = A.diagonal()
+  Dinv = sp.csr_matrix((1/A_diag)[:, np.newaxis] )
+  R = A - sp.diags( [ A_diag ], [0] ) 
 
   #print 'A1', A1
   #print 'A2', A2
