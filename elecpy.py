@@ -207,6 +207,7 @@ def sim_generator():
         cnt_udt += dstep
 
     print "elecpy done"
+    yield False
 
 if __name__ == '__main__':
 
