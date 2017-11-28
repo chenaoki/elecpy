@@ -157,7 +157,7 @@ def sim_generator():
         # step.2 phie
         rhs_phie = i_ext_e - i_ext_i - pde_i.forward(vmem)
         pde_cnt, phie = pde_m.solve(phie, rhs_phie)
-        phie -= phie[0,0]
+        phie -= phie[0]
 
         # step.3 vmem
         rhs_vmem = pde_i.forward(vmem)
