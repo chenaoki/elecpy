@@ -110,8 +110,8 @@ def sim_generator():
         cnt_restart = sim_params['restart']['count']
         srcpath = sim_params['restart']['source']
         pfx = '_{0:0>4}'.format(cnt_restart)
-        phie = np.load('{0}/phie{1}.npy'.format(srcpath,pfx))
-        vmem = np.load('{0}/vmem{1}.npy'.format(srcpath,pfx))
+        phie = np.load('{0}/phie{1}.npy'.format(srcpath,pfx)).flatten()
+        vmem = np.load('{0}/vmem{1}.npy'.format(srcpath,pfx)).flatten()
         cells.load('{0}/cell{1}'.format(srcpath,pfx))
         cnt_udt = cnt_restart * cnt_log
     print "...done"
@@ -156,7 +156,7 @@ def sim_generator():
 
         # step.2 phie
         rhs_phie = i_ext_e - i_ext_i - pde_i.forward(vmem)
-        pde_cnt, phie = pde_m.solve(phie, rhs_phie)
+        pde_cnt, phie = pde_m.solve(phie, rhs_phie, tol=1e-2, maxcnt=1e5)
         phie -= phie[0]
 
         # step.3 vmem

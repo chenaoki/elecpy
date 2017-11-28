@@ -11,6 +11,13 @@ class Stimulator(object):
         self.amplitude    = abs(amplitude)  # (uA/cm^2)
         self._map_on      = np.zeros( self.shape, dtype=np.float64 )
         self._map_off     = np.zeros( self.shape, dtype=np.float64 )
+
+    def set_trigger(self, now, trigger):
+        if trigger is True:
+            self.start = now
+            self.train = 1 
+
+        return
     
     def get_flag(self, t):
         if t >= self.start and t < self.start + self.train * self.interval and (t - self.start) % self.interval < self.duration:
