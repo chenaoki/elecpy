@@ -17,27 +17,48 @@ from cell.luorudy.model import model as cell_model_luorudy
 from cell.mahajan.model import model as cell_model_mahajan
 from util.cmap_bipolar import bipolar
 
+# global variables
 sim_params = None
+cells = None
+stims_ext = []
+stims_mem = []
+i_ion    = None
+phie     = None
+i_ext_e  = None
+i_ext_i  = None
+rhs_phie = None 
+rhs_vmem = None 
+vmem     = None 
 
+# Functions
 def conv_cntSave2time(cnt_save):
+    global sim_params
     udt          = sim_params['time']['udt']     # Universal time step (ms)
     cnt_log      = sim_params['log']['cnt']      # num of udt for logging
     return udt*cnt_log
 
 def conv_cntUdt2time(cnt_udt):
+    global sim_params
     udt          = sim_params['time']['udt']     # Universal time step (ms)
     return cnt_udt * udt
 
 def conv_time2cntUdt(t):
+    global sim_params
     udt          = sim_params['time']['udt']     # Universal time step (ms)
     return int(t/udt)
 
 def conv_time2cntSave(t):
+    global sim_params
     udt          = sim_params['time']['udt']     # Universal time step (ms)
     cnt_log      = sim_params['log']['cnt']      # num of udt for logging
     return conv_time2cntUdt(t) // cnt_log 
 
-def sim_generator():
+def sim_generator( params ):
+
+    global sim_params, cells, stims_ext, stims_mem
+    global i_ion, phie, i_ext_e, i_ext_i, rhs_phie, rhs_vmem, vmem
+    
+    sim_params = params
 
     assert sim_params is not None
 
@@ -68,7 +89,6 @@ def sim_generator():
     savepath     = sim_params['log']['path']
 
     # Cell model settings
-    cells = None
     if sim_params['cell_type'] == 'ohararudy':
         cells = cell_model_ohararudy((N))
     if sim_params['cell_type'] == 'luorudy':
@@ -78,8 +98,6 @@ def sim_generator():
     assert cells is not None
 
     print "Stimulation settings",
-    stims_ext = []
-    stims_mem = []
     if 'stimulation' in sim_params.keys():
         stim_param = sim_params['stimulation']
         if 'extracellular' in stim_param:
