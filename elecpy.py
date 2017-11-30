@@ -98,6 +98,8 @@ def sim_generator( params ):
     assert cells is not None
 
     print "Stimulation settings",
+    stims_ext = []
+    stims_mem = []
     if 'stimulation' in sim_params.keys():
         stim_param = sim_params['stimulation']
         if 'extracellular' in stim_param:
