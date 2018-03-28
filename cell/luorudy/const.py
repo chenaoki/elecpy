@@ -54,7 +54,7 @@ const_d = {
   # Terms for Solution of Conductance and Reversal Potential
   'R_'    : 8314 ,     # Universal Gas Constant (J/kmol*K)
   'frdy_' : 96485,     # Faraday's Constant (C/mol)
-  'temp_' : 310  ,     # Temperature (K)
+  'temp_' : 310.0  ,     # Temperature (K)
 
   # Extracellular ion concentration
   'nao_'   : 130.0          , # Extracellular Na (mM)
@@ -139,9 +139,9 @@ const_d = {
   'bsrbar_' : 0.047,
   'ibarnak_' : 2.25,
   'cmdnbar_' : 0.050,    # Max. [Ca] buffered in CMDN (mM)
-	'trpnbar_' : 0.070,    # Max. [Ca] buffered in TRPN (mM)
-	'kmcmdn_'  : 0.00238,  # Equalibrium constant of buffering for CMDN (mM)
-	'kmtrpn_'  : 0.0005,   # Equalibrium constant of buffering for TRPN (mM)
+  'trpnbar_' : 0.070,    # Max. [Ca] buffered in TRPN (mM)
+  'kmcmdn_'  : 0.00238,  # Equalibrium constant of buffering for CMDN (mM)
+  'kmtrpn_'  : 0.0005,   # Equalibrium constant of buffering for TRPN (mM)
 
   'sigma_' : (exp(130.0/67.3)-1)/7,  #(exp(nao_/67.3)-1)/7
 
@@ -160,7 +160,7 @@ const_d = {
   # Shift in steady-state (in)activation curves [mV/K]
   'SINFM_' : 0.8,
   'SINFHJ_' : 0.7,
-  'SINFXR_' : -1.16,
+  'SINFXR_' : 1.16,
 
   # Q10 for time constant of (in)activation
   'Q10TAUMHJ_' : 2.79,
@@ -169,5 +169,5 @@ const_d = {
   'Q10TAUBG_' : 2.5,
   'Q10TAUXR_' : 6.25,
   'Q10TAUXS_' : 2.58,
-
+  'Q10OTHERS_' : 3.0,
 }
