@@ -12,11 +12,11 @@ def make_2Darray(src_dir, width, height, out_dir):
         file_name = file_dir.split(('/').replace('/', os.sep))[-1]
         src_array = np.load(file_dir)
         out_array = np.ones((height, width)) * src_array
-        np.save(os.path.join(out_dir, 'cell_0000', file_name).replace('/', os.sep), out_array)
+        np.save(os.path.join(out_dir, 'cell_0000', file_name).replace('/', os.sep), out_array.flatten())
         if file_name == 'v.npy':
-            np.save(os.path.join(out_dir, 'vmem_0000.npy').replace('/', os.sep), out_array)
+            np.save(os.path.join(out_dir, 'vmem_0000.npy').replace('/', os.sep), out_array.flatten())
     phie_array = np.zeros((height, width))
-    np.save(os.path.join(out_dir, 'phie_0000.npy').replace('/', os.sep), phie_array)
+    np.save(os.path.join(out_dir, 'phie_0000.npy').replace('/', os.sep), phie_array.flatten())
 
 if __name__ == "__main__":
     parser = OptionParser()
