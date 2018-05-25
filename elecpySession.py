@@ -45,7 +45,7 @@ class ElecpySession(object):
         
         return ret
     
-    def saveAnimation(self, save_dir, keys=None, time_range=None):
+    def saveAnimation(self, save_dir, keys=None, time_range=None, ext='mp4', cmap='gray'):
         
         if keys is None : keys = self.data.keys()
         if time_range is None : time_range = np.arange(self.L)
@@ -63,12 +63,16 @@ class ElecpySession(object):
                 im = plt.imshow(
                     img,
                     vmin = vmin, vmax = vmax,
-                    cmap='hot',
+                    cmap=cmap,
                     interpolation='nearest')
                 ims.append([im])
 
             ani = animation.ArtistAnimation(fig, ims, interval=30)
-            ani.save(os.path.join(save_dir, '{0}.gif'.format(key)), writer="imagemagick")
+            
+            if ext is 'gif':
+                ani.save(os.path.join(save_dir, '{0}.gif'.format(key)), writer="imagemagick")
+            if ext is 'mp4':
+                ani.save(os.path.join(save_dir, '{0}.mp4'.format(key)), writer="ffmpeg")
             
     def pseudoECG(self, i, j):
         
