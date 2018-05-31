@@ -122,6 +122,7 @@ def sim_generator( params ):
     i_ext_i            = np.zeros((N),dtype=np.float64)
     rhs_phie           = np.zeros((N),dtype=np.float64)
     rhs_vmem           = np.zeros((N),dtype=np.float64)
+    tone               = np.zeros((N),dtype=np.float64)
     vmem               = np.copy(cells.get_param('v'))
     print "...done"
 
@@ -182,6 +183,7 @@ def sim_generator( params ):
         # step.3 vmem
         rhs_vmem = pde_i.forward(vmem)
         rhs_vmem += pde_i.forward(phie)
+        tone     = ( rhs_vmem * dt ) / (Cm * Sv)
         rhs_vmem -= i_ion * Sv
         rhs_vmem += i_ext_i
         rhs_vmem *= 1 / (Cm * Sv)
@@ -194,6 +196,7 @@ def sim_generator( params ):
             print '------------------{0}ms'.format(t)
             np.save('{0}/phie_{1:0>4}'.format(savepath,cnt_save), phie.reshape((im_h, im_w)))
             np.save('{0}/vmem_{1:0>4}'.format(savepath,cnt_save), vmem.reshape((im_h, im_w)))
+            np.save('{0}/tone_{1:0>4}'.format(savepath,cnt_save), tone.reshape((im_h, im_w)))
             cells.save('{0}/cell_{1:0>4}'.format(savepath,cnt_save))
             yield vmem
 
