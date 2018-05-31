@@ -11,20 +11,38 @@ class ElecpySession(object):
     def __init__(self, path):
         
         self.path = path
+        self.L = None
+        self.shape = None
         self.data = {}
+        self.keys = {'vmem', 'phie', 'tone', 'cell/m', 'cell/h', 'cell/j', 'cell/xina'}
         
-        vmem_files = sorted( glob.glob(os.path.join(self.path, 'vmem*.npy')))
-        phie_files = sorted( glob.glob(os.path.join(self.path, 'phie*.npy')))
-        assert len(vmem_files) ==  len(phie_files)
-        self.L = len(vmem_files)
-        _img_vmem = np.load( vmem_files[0])
-        _img_phie = np.load( phie_files[0])       
-        assert _img_vmem.shape == _img_phie.shape
+        for key in self.keys:
+            
+            if 'cell' in key:
+                files = sorted( glob.glob(os.path.join(self.path, 'cell*/{0}.npy'.format(key.replace('cell', '')))))
+            else:
+                files = sorted( glob.glob(os.path.join(self.path, '{0}*.npy'.format(key))))
+            
+            if self.L is None:
+                self.L = len(files)
+            else:
+                assert self.L == len(files)
+                
+            img = np.load( files[0])
+            if 'cell' in key:
+                img = img.reshape(self.shape)
+                
+            if self.shape is None:
+                self.shape = img.shape
+            else:
+                assert self.shape == img.shape
         
-        self.data['vmem'] = np.zeros(np.concatenate(([self.L], _img_vmem.shape)), dtype=_img_vmem.dtype)
-        self.data['phie'] = np.zeros(np.concatenate(([self.L], _img_phie.shape)), dtype=_img_phie.dtype)        
-        for i, _f in enumerate(vmem_files): self.data['vmem'][i,:,:] = np.load(_f)
-        for i, _f in enumerate(phie_files): self.data['phie'][i,:,:] = np.load(_f)
+            self.data[key] = np.zeros( np.concatenate(([self.L], img.shape)), dtype=img.dtype)            
+            for i, _f in enumerate(files): 
+                img = np.load( _f)
+                if 'cell' in key:
+                    img = img.reshape(self.shape)
+                self.data[key][i,:,:] = img
             
     def getNormalized(self):
             
