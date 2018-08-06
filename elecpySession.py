@@ -8,13 +8,17 @@ from numba.decorators import autojit
 
 class ElecpySession(object):
     
-    def __init__(self, path):
+    def __init__(self, path, keys=None):
         
         self.path = path
         self.L = None
         self.shape = None
         self.data = {}
-        self.keys = {'vmem', 'phie', 'tone', 'cell/m', 'cell/h', 'cell/j', 'cell/xina'}
+        
+        if keys is None:
+            self.keys = {'vmem', 'phie', 'cell/m', 'cell/h', 'cell/j', 'cell/xina'}
+        else:
+            self.keys = keys
         
         for key in self.keys:
             
@@ -43,6 +47,18 @@ class ElecpySession(object):
                 if 'cell' in key:
                     img = img.reshape(self.shape)
                 self.data[key][i,:,:] = img
+                
+    def setRange(self, x_min = None, x_max = None, y_min = None, y_max = None, f_min=None, f_max=None):
+        if x_min is None: x_min = 0
+        if y_min is None: y_min = 0
+        if y_min is None: f_min = 0
+        if x_min is None: x_max = self.data['vmem'].shape[2]
+        if y_min is None: y_max = self.data['vmem'].shape[1]
+        if y_min is None: f_max = self.data['vmem'].shape[0]
+        
+        for key in self.data.keys():
+            self.data[key] = self.data[key][f_min:f_max, y_min:y_max, x_min:x_max]
+            
             
     def getNormalized(self):
             
