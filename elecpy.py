@@ -1,6 +1,6 @@
 #!/usr/local/bin/python
 
-import os
+import os, sys
 import json
 import numpy as np
 import matplotlib.pyplot as plt
@@ -193,7 +193,8 @@ def sim_generator( params ):
         cnt_save_now = conv_time2cntSave(t)
         if cnt_save_now != cnt_save:
             cnt_save = cnt_save_now
-            print '------------------{0}ms'.format(t)
+            sys.stdout.write('\r------------------{0}/{1}ms'.format(t, time_end))
+            sys.stdout.flush()
             np.save('{0}/phie_{1:0>4}'.format(savepath,cnt_save), phie.reshape((im_h, im_w)))
             np.save('{0}/vmem_{1:0>4}'.format(savepath,cnt_save), vmem.reshape((im_h, im_w)))
             np.save('{0}/tone_{1:0>4}'.format(savepath,cnt_save), tone.reshape((im_h, im_w)))
