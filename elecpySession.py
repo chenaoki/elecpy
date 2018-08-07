@@ -16,7 +16,7 @@ class ElecpySession(object):
         self.data = {}
         
         if keys is None:
-            self.keys = {'vmem', 'phie', 'cell/m', 'cell/h', 'cell/j', 'cell/xina'}
+            self.keys = {'vmem', 'phie', 'cell/m', 'cell/h', 'cell/j'}
         else:
             self.keys = keys
         
@@ -30,6 +30,7 @@ class ElecpySession(object):
             if self.L is None:
                 self.L = len(files)
             else:
+                print( (key, self.L, len(files) ) )
                 assert self.L == len(files)
                 
             img = np.load( files[0])
