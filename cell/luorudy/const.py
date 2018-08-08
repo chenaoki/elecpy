@@ -49,6 +49,7 @@ const_d = {
   'ryrIfive_'    : 0.0            , #
   'sponrel_'     : 0.0            , #
   'it_'          : 0.0            , # Total current (uA/cm^2)
+  'ina_'         : 0.0            , # Sodium current (uA/cm^2)
   'st_'          : 0.0            , # Stimulus current (uA/cm^2)
 
   # Terms for Solution of Conductance and Reversal Potential
@@ -130,6 +131,7 @@ const_d = {
   'gna_'  : 16         , # Max. Conductance of the Na Channel (mS/uF)
   'gkr_'   : 0.031368*sqrt(4.5/5.4), #0.031368*sqrt(ko_/5.4),
   'gki_'   : 0.5625*(sqrt(4.5/5.4)), #0.5625*(sqrt(ko_/5.4)),
+  'gks_'   : 0.3031,
 
   'kmbsr_' : 0.00087,
   'kmbsl_':0.127,

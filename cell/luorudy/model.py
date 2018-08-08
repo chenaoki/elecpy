@@ -59,7 +59,8 @@ class model(cellmodel):
             'csqn',
             'sponrel',
             'jsr',
-            'it'
+            'it', 
+            'ina'
         ]
         self.create()
         path = os.path.dirname(__file__)

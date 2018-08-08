@@ -61,7 +61,7 @@ _m = _mss - (_mss-m)*exp(-dt/_mtau);
 _h = _hss - (_hss-h)*exp(-dt/_htau);
 _j = _jss - (_jss-j)*exp(-dt/_jtau);
 double _gna = {gna_}*pow({Q10NA_}, (temp-{temp_})/10.0);
-double _ina = _gna*_m*_m*_m*_h*_j*(_v-_ena);
+_ina = _gna*_m*_m*_m*_h*_j*(_v-_ena);
 
 // comp_ltypesc
 //   +- comp_rates
@@ -175,7 +175,7 @@ double _gkr = {gkr_}*pow({Q10KR_}, (temp-{temp_})/10.0);
 double _ikr = _gkr*_xr*_r*(_v-_ekr);
 
 // comp_iks
-double _gks = (0.3031*(1+0.6/(1+pow((0.000038/cai),1.4))))*pow({Q10KS_}, (temp-{temp_})/10.0);
+double _gks = ({gks_}*(1+0.6/(1+pow((0.000038/cai),1.4))))*pow({Q10KS_}, (temp-{temp_})/10.0);
 double _eks = (({R_}*temp)/{frdy_})*log(({ko_}+{prnak_}*{nao_})/(ki+{prnak_}*nai));
 double _xs1ss = 1/(1+exp(-(_v-1.5)/16.7));
 double _xs2ss = _xs1ss;
