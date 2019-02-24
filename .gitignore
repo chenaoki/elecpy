@@ -14,3 +14,4 @@ stim_pattern*
 *.dat
 temp/*
 *.DS_Store
+*.ipynb
