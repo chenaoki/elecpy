@@ -1,0 +1,14 @@
+version: '2.3'
+services:
+  elecpy:
+    runtime: nvidia
+    build:
+      context: ./
+    image: chenaoki/elecpy 
+    container_name: chenaoki_elecpy
+    ports:
+      - "5437:8888"
+    volumes:
+      - ./:/notebooks
+      - /mnt:/mnt
+
