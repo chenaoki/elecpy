@@ -9,6 +9,6 @@ services:
     ports:
       - "5437:8888"
     volumes:
-      - ./:/notebooks
+      - ../../:/notebooks
       - /mnt:/mnt
 
