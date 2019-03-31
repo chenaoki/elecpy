@@ -61,10 +61,10 @@ double _gna = {gna_} * pow({Q10NA_}, (temp-{temp_})/10.0);
 double _gkix = {gkix_} * pow({Q10K1_}, (temp-{temp_})/10.0);
 double _gkr = {gkr_} * pow({Q10KR_}, (temp-{temp_})/10.0);
 double _gks = {gks_} * pow({Q10KS_}, (temp-{temp_})/10.0);
-double _gtos = {gtos_} * pow({Q10TO_}, (temp-{temp_})/10.0)*1.4;
-double _gtof = {gtof_} * pow({Q10TO_}, (temp-{temp_})/10.0)*1.4;
+double _gtos = {gtos_} * pow({Q10TO_}, (temp-{temp_})/10.0)*1.9;
+double _gtof = {gtof_} * pow({Q10TO_}, (temp-{temp_})/10.0)*1.9;
 double _gNaCa = {gNaCa_} * pow({Q10NACA_}, (temp-{temp_})/10.0);
-double _gca = {gca_} * pow({Q10CAL_}, (temp-{temp_})/10.0)/1.4;
+double _gca = {gca_} * pow({Q10CAL_}, (temp-{temp_})/10.0)/1.9;
 double _gNaK = {gNaK_} * pow({Q10NAK_}, (temp-{temp_})/10.0);
 
 // INa current
@@ -218,8 +218,8 @@ double _xiryr = _xirp+_xicap;
 
 // calculate difference
 double _djsr = (nsr - jsr)/{taua_};
-double _dh = (_ah*(1.00000-h) - _bh*h)*1.4;
-double _dj = (_aj*(1.00000-j) - _bj*j)*1.4;
+double _dh = (_ah*(1.00000-h) - _bh*h)*1.9;
+double _dj = (_aj*(1.00000-j) - _bj*j)*1.9;
 double _dm = _am*(1.00000-m) - _bm*m;
 double _dxs1 = (_xs1ss - xs1)/_tauxs1;
 double _dxs2 = (_xs2ss - xs2)/_tauxs2;

@@ -70,9 +70,9 @@ def sim_generator( params ):
     Sv           = 1400                  # Surface-to-volume ratio (cm^-1)
     Cm           = 1.0                   # Membrane capacitance (uF/cm^2)
     sigma_l_i    = 1.74                  # (mS/cm)
-    sigma_t_i    = 0.19                  # (mS/cm)
+    sigma_t_i    = 1.74                  # (mS/cm)
     sigma_l_e    = 6.25                  # (mS/cm)
-    sigma_t_e    = 2.36                  # (mS/cm)
+    sigma_t_e    = 6.25                  # (mS/cm)
 
     # Geometory settings
     im_h         = sim_params['geometory']['height']
