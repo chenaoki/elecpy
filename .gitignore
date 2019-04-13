@@ -15,3 +15,4 @@ stim_pattern*
 temp/*
 *.DS_Store
 *.ipynb
+docker-compose.yml
