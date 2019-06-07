@@ -113,6 +113,17 @@ def sim_generator( params ):
                 assert tuple(stim.shape) == (im_h, im_w)
                 stims_mem.append(stim)
     print "...done"
+    
+    print "Mask settings"
+    mask_it = np.ones((im_h, im_w)).flatten()
+    if 'mask' in sim_params.keys():
+        mask_param = sim_params['mask']
+        if 'it' in mask_param.keys():
+            mask_it = np.load(mask_param['it'])
+            assert mask_it.shape == (im_h, im_w)
+            mask_it = mask_it.flatten()
+    print "...done"
+
 
     print "Allocating data...",
     cells.create()
@@ -174,6 +185,9 @@ def sim_generator( params ):
         cells.set_param('v', cuda.to_gpu(vmem) )
         cells.update()
         i_ion = cells.get_param('it')
+
+        # masking
+        i_ion = i_ion * mask_it
 
         # step.2 phie
         rhs_phie = i_ext_e - i_ext_i - pde_i.forward(vmem)
