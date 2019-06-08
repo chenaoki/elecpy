@@ -6,7 +6,7 @@ import matplotlib.animation as animation
 from scipy.ndimage import convolve
 from numba.decorators import autojit
 
-class ElecpySession(object):
+class Loader(object):
     
     def __init__(self, path, keys=None):
         
@@ -62,7 +62,7 @@ class ElecpySession(object):
             
     def getNormalized(self):
             
-        ret = ElecpySession (self.path)
+        ret = Loader (self.path)
         
         def pixelwise_normalize(X):
             L, M, N = X.shape

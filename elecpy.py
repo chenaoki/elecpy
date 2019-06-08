@@ -1,6 +1,6 @@
 #!/usr/local/bin/python
 
-import os
+import os, sys
 import json
 import numpy as np
 import matplotlib.pyplot as plt
@@ -87,6 +87,12 @@ def sim_generator( params ):
     # Logging settings
     cnt_log      = sim_params['log']['cnt']      # num of udt for logging
     savepath     = sim_params['log']['path']
+
+    # Create result folder
+    if not os.path.isdir(savepath) :
+        os.mkdir(savepath)
+    with open('{0}/sim_params.json'.format(savepath), 'w') as f:
+        json.dump(sim_params, f, indent=4)
 
     # Cell model settings
     if sim_params['cell_type'] == 'ohararudy':
@@ -223,78 +229,8 @@ def sim_generator( params ):
             if flg is True:
                 break
 
-        # Stim off count
-        if flg_st_temp is False:
-            if flg_st is True:
-                cnt_st_off = 0
-            else:
-                cnt_st_off += 1
-            flg_st = flg_st_temp
-
-        # Time step control
-        if run_udt:
-            if cnt_st_off >= 3 and cnt_udt % 10 == 0:
-                dstep = 2
-                run_udt = False
-        else:
-            if pde_cnt > 5:
-                dstep = 1
-                run_udt = True
-
         cnt_udt += dstep
 
     print "elecpy done"
     yield False
-
-if __name__ == '__main__':
-
-    parser = OptionParser()
-    parser.add_option(
-        '-p','--param_file',
-        dest='param_file', action='store', type='string', default='./temp/sim_params.json',
-        help="json file of simulation parameters")
-    parser.add_option(
-        '-d','--dst',
-        dest='savepath', action='store', type='string', default='./temp/result/',
-        help="Save data path.")
-
-    (options, args) = parser.parse_args()
-
-    with open (options.param_file,'r') as f:
-        sim_params = json.load(f)
-    if not os.path.isdir(options.savepath) :
-        os.mkdir(options.savepath)
-    with open('{0}/sim_params.json'.format(options.savepath), 'w') as f:
-        json.dump(sim_params, f, indent=4)
-    sim_params['log']['path'] = options.savepath
-
-    im_h         = sim_params['geometory']['height']
-    im_w         = sim_params['geometory']['width']
-    fig = plt.figure(figsize=(5,5))
-    im = plt.imshow(
-        np.zeros((im_h,im_w),dtype=np.float64),
-        vmin = -100.0, vmax = 100.0,
-        cmap=bipolar(neutral=0, lutsize=1024),
-        interpolation='nearest')
-    plt.axis('off')
-
-    g = sim_generator()
-
-    def init():
-        im.set_array(np.zeros((im_h,im_w),dtype=np.float64))
-        return (im,)
-
-    def draw(data):
-        try:
-            vmem = g.next()
-            im.set_array(vmem)
-            return (im,)
-        except StopIteration:
-            return init()
-
-    anim = animation.FuncAnimation(
-            fig, draw, init_func=init, 
-            save_count = conv_time2cntSave(sim_params['time']['end']),
-            blit=False, interval=50, repeat=False)
-    plt.show()
 
