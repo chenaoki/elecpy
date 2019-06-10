@@ -5,6 +5,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 import chainer
+import h5py
 from chainer import cuda
 from matplotlib import animation
 from optparse import OptionParser
@@ -120,7 +121,7 @@ def sim_generator( params ):
                 stims_mem.append(stim)
     print "...done"
     
-    print "Mask settings"
+    print "Mask settings...",
     mask_it = np.ones((im_h, im_w)).flatten()
     if 'mask' in sim_params.keys():
         mask_param = sim_params['mask']
@@ -147,10 +148,11 @@ def sim_generator( params ):
     if 'restart' in sim_params.keys():
         cnt_restart = sim_params['restart']['count']
         srcpath = sim_params['restart']['source']
-        pfx = '_{0:0>4}'.format(cnt_restart)
-        phie = np.load('{0}/phie{1}.npy'.format(srcpath,pfx)).flatten()
-        vmem = np.load('{0}/vmem{1}.npy'.format(srcpath,pfx)).flatten()
-        cells.load('{0}/cell{1}'.format(srcpath,pfx))
+        with h5py.File(os.path.join(srcpath, 'out.h5'), 'r') as f:
+            group_id = '{0:0>4}'.format(cnt_restart)
+            phie = f[group_id]['phie'].value.flatten()
+            vmem = f[group_id]['vmem'].value.flatten()
+            cells.load(f, group_id)
         cnt_udt = cnt_restart * cnt_log
     print "...done"
 
@@ -172,65 +174,69 @@ def sim_generator( params ):
     cnt_st_off = 0
 
     print 'Main loop start!'
-    while t < time_end:
+    with h5py.File(os.path.join(savepath, 'out.h5'),'w') as outf:
+        while t < time_end:
 
-        t = conv_cntUdt2time(cnt_udt)
-        dt = dstep * udt
+            t = conv_cntUdt2time(cnt_udt)
+            dt = dstep * udt
 
-        # Stimulation control
-        i_ext_e[:] = 0.0
-        flg_st_temp = False
-        for s in stims_ext:
-            i_ext_e += s.get_current(t)*Sv
-            flg_st_temp = flg_st_temp or s.get_flag(t)
-        for s in stims_mem:
-            cells.set_param('st', s.get_current(t)) 
+            # Stimulation control
+            i_ext_e[:] = 0.0
+            flg_st_temp = False
+            for s in stims_ext:
+                i_ext_e += s.get_current(t)*Sv
+                flg_st_temp = flg_st_temp or s.get_flag(t)
+            for s in stims_mem:
+                cells.set_param('st', s.get_current(t)) 
 
-        # step.1 cell state transition
-        cells.set_param('dt', dt )
-        cells.set_param('v', cuda.to_gpu(vmem) )
-        cells.update()
-        i_ion = cells.get_param('it')
+            # step.1 cell state transition
+            cells.set_param('dt', dt )
+            cells.set_param('v', cuda.to_gpu(vmem) )
+            cells.update()
+            i_ion = cells.get_param('it')
 
-        # masking
-        i_ion = i_ion * mask_it
+            # masking
+            i_ion = i_ion * mask_it
 
-        # step.2 phie
-        rhs_phie = i_ext_e - i_ext_i - pde_i.forward(vmem)
-        pde_cnt, phie = pde_m.solve(phie, rhs_phie, tol=1e-2, maxcnt=1e5)
-        phie -= phie[0]
+            # step.2 phie
+            rhs_phie = i_ext_e - i_ext_i - pde_i.forward(vmem)
+            pde_cnt, phie = pde_m.solve(phie, rhs_phie, tol=1e-2, maxcnt=1e5)
+            phie -= phie[0]
 
-        # step.3 vmem
-        rhs_vmem = pde_i.forward(vmem)
-        rhs_vmem += pde_i.forward(phie)
-        tone     = ( rhs_vmem * dt ) / (Cm * Sv)
-        rhs_vmem -= i_ion * Sv
-        rhs_vmem += i_ext_i
-        rhs_vmem *= 1 / (Cm * Sv)
-        vmem += dt * rhs_vmem
+            # step.3 vmem
+            rhs_vmem = pde_i.forward(vmem)
+            rhs_vmem += pde_i.forward(phie)
+            tone     = ( rhs_vmem * dt ) / (Cm * Sv)
+            rhs_vmem -= i_ion * Sv
+            rhs_vmem += i_ext_i
+            rhs_vmem *= 1 / (Cm * Sv)
+            vmem += dt * rhs_vmem
 
-        # Logging & error check
-        cnt_save_now = conv_time2cntSave(t)
-        if cnt_save_now != cnt_save:
-            cnt_save = cnt_save_now
-            sys.stdout.write('\r------------------{0}/{1}ms'.format(t, time_end))
-            sys.stdout.flush()
-            np.save('{0}/phie_{1:0>4}'.format(savepath,cnt_save), phie.reshape((im_h, im_w)))
-            np.save('{0}/vmem_{1:0>4}'.format(savepath,cnt_save), vmem.reshape((im_h, im_w)))
-            np.save('{0}/tone_{1:0>4}'.format(savepath,cnt_save), tone.reshape((im_h, im_w)))
-            cells.save('{0}/cell_{1:0>4}'.format(savepath,cnt_save))
-            yield vmem
+            # Logging & error check
+            cnt_save_now = conv_time2cntSave(t)
+            if cnt_save_now != cnt_save:
+                cnt_save = cnt_save_now
+                sys.stdout.write('\r------------------{0}/{1}ms'.format(t, time_end))
+                sys.stdout.flush()
 
-            flg = False
-            for i,v in enumerate(vmem):
-                if v != v :
-                    print "error : invalid value {1} @ {0} ms, index {2}".format(t, v, i)
-                    flg = True
+                group_id = '{0:0>4}'.format(cnt_save)
+                outf.create_group(group_id)
+                outf[group_id].create_dataset('vmem', data = vmem.reshape((im_h, im_w)))
+                outf[group_id].create_dataset('phie', data = phie.reshape((im_h, im_w)))
+                outf[group_id].create_dataset('tone', data = tone.reshape((im_h, im_w)))
+                cells.save(outf, group_id)
+                yield vmem
+
+                flg = False
+                for i,v in enumerate(vmem):
+                    if v != v :
+                        print "error : invalid value {1} @ {0} ms, index {2}".format(t, v, i)
+                        flg = True
+                        break
+                if flg is True:
                     break
-            if flg is True:
-                break
 
-        cnt_udt += dstep
+            cnt_udt += dstep
 
     print "elecpy done"
     yield False

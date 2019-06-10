@@ -51,16 +51,15 @@ class cellmodel(object):
         self.state = [ xp.asarray( np.ones(self.shape, dtype=np.float64) * self.const[param+'_'] ) for param in self.params ]
         pass
 
-    def save(self, path):
+    def save(self, h5file, group_id):
         assert self.params is not None
-        if not os.path.isdir(path) : os.mkdir(path)
         for i, param in enumerate(self.params):
-            np.save(path+'/'+param, self.state[i].get())
+            h5file[group_id].create_dataset(param, data = self.state[i].get())
         pass
 
-    def load(self, path):
+    def load(self, h5file, group_id):
         assert self.params is not None
-        self.state = [ xp.asarray( np.load(path+'/'+param+'.npy')) for param in self.params ]
+        self.state = [ xp.asarray( h5file[group_id][param].value) for param in self.params ]
         pass
 
     def set_param(self, param_name, param_value):
