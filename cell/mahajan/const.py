@@ -45,6 +45,9 @@ const_d = {
   'xica_'        : 0.0               , #
   'xiNaK_'       : 0.0               , #
 
+  # Initial values of variable coefficients
+  'c_brugada_'   : 1.4               ,
+
   # Initial values of constants
   'vth_'         : 0.0               , #
   's1t_'         : 0.00195           , #
