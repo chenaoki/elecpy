@@ -2,6 +2,7 @@ import numpy as np
 import os, glob
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import h5py
 
 from scipy.ndimage import convolve
 from numba.decorators import autojit
@@ -16,38 +17,24 @@ class Loader(object):
         self.data = {}
         
         if keys is None:
-            self.keys = {'vmem', 'phie', 'cell/m', 'cell/h', 'cell/j'}
+            self.keys = {'vmem', 'phie'}
         else:
             self.keys = keys
-        
-        for key in self.keys:
-            
-            if 'cell' in key:
-                files = sorted( glob.glob(os.path.join(self.path, 'cell*/{0}.npy'.format(key.replace('cell', '')))))
-            else:
-                files = sorted( glob.glob(os.path.join(self.path, '{0}*.npy'.format(key))))
-            
-            if self.L is None:
-                self.L = len(files)
-            else:
-                print( (key, self.L, len(files) ) )
-                assert self.L == len(files)
+
+        with h5py.File( path, 'r') as f:
+
+            self.L = len(f.keys())
+
+            img = f[f.keys()[0]]['vmem'].value
+            self.shape = img.shape 
+
+            for key in self.keys:
+                self.data[key] = np.zeros( np.concatenate(([self.L], self.shape)), dtype=img.dtype)
                 
-            img = np.load( files[0])
-            if 'cell' in key:
-                img = img.reshape(self.shape)
-                
-            if self.shape is None:
-                self.shape = img.shape
-            else:
-                assert self.shape == img.shape
-        
-            self.data[key] = np.zeros( np.concatenate(([self.L], img.shape)), dtype=img.dtype)            
-            for i, _f in enumerate(files): 
-                img = np.load( _f)
-                if 'cell' in key:
-                    img = img.reshape(self.shape)
-                self.data[key][i,:,:] = img
+                for i, frame in enumerate(f.keys()):
+                    self.data[key][i,:,:] = f[frame][key].value.reshape(self.shape)
+        pass
+
                 
     def setRange(self, x_min = None, x_max = None, y_min = None, y_max = None, f_min=None, f_max=None):
         if x_min is None: x_min = 0
