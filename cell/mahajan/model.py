@@ -52,7 +52,8 @@ class model(cellmodel):
             'xiNaCa',
             'xica',
             'xiNaK',
-            "c_brugada"
+            'c_brugada',
+            'sw_it'
         ]
         self.create()
         path = os.path.dirname(__file__)

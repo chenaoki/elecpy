@@ -125,10 +125,10 @@ def sim_generator( params ):
     mask_it = np.ones((im_h, im_w)).flatten()
     if 'mask' in sim_params.keys():
         mask_param = sim_params['mask']
-        if 'it' in mask_param.keys():
-            mask_it = np.load(mask_param['it'])
-            assert mask_it.shape == (im_h, im_w)
-            mask_it = mask_it.flatten()
+        for key in mask_param.keys():
+            array = np.load(mask_param[key])
+            assert array.shape == (im_h, im_w)
+            cells.set_param(key, array)
     print "...done"
 
 
@@ -195,8 +195,6 @@ def sim_generator( params ):
             cells.update()
             i_ion = cells.get_param('it')
 
-            # masking
-            i_ion = i_ion * mask_it
 
             # step.2 phie
             rhs_phie = i_ext_e - i_ext_i - pde_i.forward(vmem)

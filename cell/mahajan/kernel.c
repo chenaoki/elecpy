@@ -242,7 +242,7 @@ double _dxir = _sparkrate*_Qr - (xir*(1.00000-({taur_}*_dnsr)/nsr))/{taur_};
 double _ddyad = _xiryr - (dyad-submem)/{taups_};
 double _dsubmem = _dcsib*(50.0000*(((xir-_jd)-_jca)+_jNaCa)-_xbs);
 double _dnai = -(_xina+3.00000*_xiNaK+3.00000*_xiNaCa)/({wca_}*1000.00);
-_it = _xina+_xik1+_xikr+_xiks+_xito+_xiNaCa+_xica+_xiNaK+st;
+_it = sw_it * (_xina+_xik1+_xikr+_xiks+_xito+_xiNaCa+_xica+_xiNaK+st);
 
 // rewrite status
 _jsr = jsr + _djsr * dt;
@@ -276,3 +276,4 @@ _dt = dt;
 _st = st;
 _temp = temp;
 _c_brugada = c_brugada;
+_sw_it = sw_it;

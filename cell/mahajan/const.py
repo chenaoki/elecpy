@@ -46,9 +46,10 @@ const_d = {
   'xiNaK_'       : 0.0               , #
 
   # Initial values of variable coefficients
-  'c_brugada_'   : 1.4               ,
-
-  # Initial values of constants
+  'c_brugada_'   : 1.4               , # Brugada modification parameter
+  'sw_it_'       : 1.0               , # ion current switch (0,1)
+  
+  # Constants
   'vth_'         : 0.0               , #
   's1t_'         : 0.00195           , #
   's2t_'         : 0.00105763        , #
