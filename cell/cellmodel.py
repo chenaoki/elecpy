@@ -65,7 +65,7 @@ class cellmodel(object):
     def set_param(self, param_name, param_value):
         assert param_name in self.params
         if hasattr( param_value, 'shape'):
-            self.state[self.params.index(param_name)] = cuda.to_gpu(param_value)
+            self.state[self.params.index(param_name)] = cuda.to_gpu(param_value.reshape(self.shape))
         else:
             self.state[self.params.index(param_name)] = xp.ones(self.shape, dtype=np.float64)*param_value
 

@@ -103,6 +103,7 @@ def sim_generator( params ):
     if sim_params['cell_type'] == 'mahajan':
         cells = cell_model_mahajan((N))
     assert cells is not None
+    cells.create()
 
     print "Stimulation settings",
     stims_ext = []
@@ -121,19 +122,8 @@ def sim_generator( params ):
                 stims_mem.append(stim)
     print "...done"
     
-    print "Mask settings...",
-    mask_it = np.ones((im_h, im_w)).flatten()
-    if 'mask' in sim_params.keys():
-        mask_param = sim_params['mask']
-        for key in mask_param.keys():
-            array = np.load(mask_param[key])
-            assert array.shape == (im_h, im_w)
-            cells.set_param(key, array)
-    print "...done"
-
 
     print "Allocating data...",
-    cells.create()
     i_ion              = np.zeros((N),dtype=np.float64)
     phie               = np.zeros((N),dtype=np.float64)
     i_ext_e            = np.zeros((N),dtype=np.float64)
@@ -154,6 +144,15 @@ def sim_generator( params ):
             vmem = f[group_id]['vmem'].value.flatten()
             cells.load(f, group_id)
         cnt_udt = cnt_restart * cnt_log
+    print "...done"
+
+    print "Mask settings...",
+    if 'mask' in sim_params.keys():
+        mask_param = sim_params['mask']
+        for key in mask_param.keys():
+            array = np.load(mask_param[key])
+            assert array.shape == (im_h, im_w)
+            cells.set_param(key, array.flatten())
     print "...done"
 
     print 'Building PDE system ...',
