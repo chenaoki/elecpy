@@ -53,9 +53,9 @@ RUN apt-get install -y curl grep sed dpkg && \
   apt-get clean
 
 RUN conda update -y conda
-RUN conda install -y accelerate
+RUN conda install -c numba numba=0.33.0
+RUN conda install -c numba -y pyculib=1.0.1
 RUN conda install --override-channels -c anaconda chainer 
-RUN conda install -y pyculib
 #RUN conda install -c menpo opencv3
 
 

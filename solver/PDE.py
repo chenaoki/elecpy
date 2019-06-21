@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.sparse as sp
 
-import accelerate.cuda.sparse as cusp
+import pyculib.sparse as cusp
 
 def getPDEMatrix(h, w, xx, yy, ds):
 
@@ -114,7 +114,7 @@ class PDE(object):
         self.w = w
         self.shape = (h*w,)
         self.A, self.R, self.Dinv = getPDEMatrix(h,w,xx,yy,ds) 
-        self.handl = cusp.Sparse()         # class accelerate.cuda.sparse.Sparse object
+        self.handl = cusp.Sparse()         
         self.descr = self.handl.matdescr() # matrix descriptor
 
     def forward(self, x):
