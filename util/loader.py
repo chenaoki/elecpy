@@ -96,35 +96,30 @@ class Loader(object):
             if ext is 'mp4':
                 ani.save(os.path.join(save_dir, '{0}.mp4'.format(key)), writer="ffmpeg")
             
-    def pseudoECG(self, i, j):
+    def pseudoECG(self, x, y, z):
         
-        eta = np.ones((3,3), dtype=np.float64)
+        assert 'vmem'in self.data.keys() 
         
-        k = np.ones((3,3), dtype=np.float64)
-        k[1,1] = -8.
-        
-        k = k*eta
-        
-        phie = self.data['phie']                
-        L,M,N = phie.shape
+        vmem = self.data['vmem']                
+        L,M,N = vmem.shape
 
-        def pixelwise_distance(pos_y, pos_x, pos_z = 0.):
+        def pixelwise_distance(x,y,z):
             dist = np.zeros((M, N))
-            for i_ in range(M):
-                for j_ in range(N):
-                    dist[i_, j_] = np.sqrt( pos_z**2 + (pos_y - i_)**2 + (pos_x -  j_)**2 )
+            for i in range(M):
+                for j in range(N):
+                    dist[i, j] = np.sqrt( z**2 + (y - i)**2 + (x - j)**2 )
             return dist                    
-        im_dist = autojit(pixelwise_distance)(i, j)
-        im_dist[i, j] = 1.0 ## to avoid zero division
+
+        im_dist = autojit(pixelwise_distance)(x,y,z)
+        R_y, R_x = np.gradient(1/im_dist)
 
         def framewise_ecg():
             ecg = np.zeros((L))
             for f in range(L):
-                im_conv = convolve(phie[f,:,:], k, mode='constant', cval=0.)
-                im_mul = im_conv/im_dist
-                im_mul[i, j] = 0.0
-                ecg[f] = np.sum(im_mul)
+                V_y, V_x = np.gradient(vmem[f])
+                ecg[f] = -np.sum( R_x*V_x + R_y*V_y )
             return ecg
+        
         ecg = autojit(framewise_ecg)()
         return ecg
                 
