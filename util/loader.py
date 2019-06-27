@@ -9,7 +9,7 @@ from numba.decorators import autojit
 
 class Loader(object):
     
-    def __init__(self, path, keys=None):
+    def __init__(self, path, keys=None, frames=None):
         
         self.path = path
         self.L = None
@@ -23,16 +23,27 @@ class Loader(object):
 
         with h5py.File( path, 'r') as f:
 
-            self.L = len(f.keys())
 
             img = f[f.keys()[0]]['vmem'].value
             self.shape = img.shape 
 
-            for key in self.keys:
-                self.data[key] = np.zeros( np.concatenate(([self.L], self.shape)), dtype=img.dtype)
-                
+            if frames is None: #load all frames
+                self.L = len(f.keys())
+                for key in self.keys:
+                    self.data[key] = np.zeros( np.concatenate(([self.L], self.shape)), dtype=img.dtype)
+                    
                 for i, frame in enumerate(f.keys()):
-                    self.data[key][i,:,:] = f[frame][key].value.reshape(self.shape)
+                    for key in self.keys:
+                        self.data[key][i,:,:] = f[frame][key].value.reshape(self.shape)
+            else:
+                self.L = len(frames)
+                for key in self.keys:
+                    self.data[key] = np.zeros( np.concatenate(([self.L], self.shape)), dtype=img.dtype)
+                for i,n_frame in enumerate(frames):
+                    frame = u'{0:0>4}'.format(n_frame) 
+                    if not frame in f.keys(): break
+                    for key in self.keys:
+                        self.data[key][i,:,:] = f[frame][key].value.reshape(self.shape)
         pass
 
                 
@@ -96,11 +107,9 @@ class Loader(object):
             if ext is 'mp4':
                 ani.save(os.path.join(save_dir, '{0}.mp4'.format(key)), writer="ffmpeg")
             
-    def pseudoECG(self, x, y, z):
+    def pseudoECG(self, x, y, z, key='vmem'):
         
-        assert 'vmem'in self.data.keys() 
-        
-        vmem = self.data['vmem']                
+        vmem = self.data[key]                
         L,M,N = vmem.shape
 
         def pixelwise_distance(x,y,z):
