@@ -52,6 +52,9 @@ const_d = {
   'ina_'         : 0.0            , # Sodium current (uA/cm^2)
   'st_'          : 0.0            , # Stimulus current (uA/cm^2)
 
+  'c_brugada_'   : 1.0            ,
+  'sw_it_'       : 1.0            ,
+
   # Terms for Solution of Conductance and Reversal Potential
   'R_'    : 8314 ,     # Universal Gas Constant (J/kmol*K)
   'frdy_' : 96485,     # Faraday's Constant (C/mol)
