@@ -171,7 +171,7 @@ class MonodomainSimulator(object):
                     sys.stdout.write('\r------------------{0}/{1}ms'.format(t, time_end))
                     sys.stdout.flush()
 
-                    group_id = '{0:0>4}'.format(cnt_save)
+                    group_id = '{0:0>4}'.format(int(cnt_save))
                     outf.create_group(group_id)
                     outf[group_id].create_dataset('vmem', data = vmem.reshape((im_h, im_w)))
                     cells.save(outf, group_id)
