@@ -3,7 +3,7 @@ import scipy.sparse as sp
 
 import pyculib.sparse as cusp
 
-def getPDEMatrix(h, w, xx, yy, ds):
+def getPDEMatrix(h, w, xx, yy, ds, ref_temp, temp_array):
 
     size_real = h*w
     size_all  = (h+2)*(w+2)
@@ -88,14 +88,21 @@ def getPDEMatrix(h, w, xx, yy, ds):
     # Parabolic PDE coefficients
     # A2 = np.zeros((size_real, size_all), dtype=np.float64)
     A2 = sp.lil_matrix((size_real, size_all), dtype=np.float64)
+    temp_diff = np.ones_like(temp_array)*ref_temp - temp_array
 
     for ivec in range(size_real):
         y, x = coord_real(ivec)
-        A2[ ivec, ivec_all(y+1, x+1)] = -(2*xx+2*yy)/(ds**2)
-        A2[ ivec, ivec_all(y  , x+1)] = yy/(ds**2)
-        A2[ ivec, ivec_all(y+2, x+1)] = yy/(ds**2)
-        A2[ ivec, ivec_all(y+1, x  )] = xx/(ds**2)
-        A2[ ivec, ivec_all(y+1, x+2)] = xx/(ds**2)
+        #A2[ ivec, ivec_all(y+1, x+1)] = -(2*xx+2*yy)/(ds**2)*(1-0.039*temp_diff[y,x])
+        #A2[ ivec, ivec_all(y  , x+1)] = yy/(ds**2)*(1-0.039*temp_diff[y,x])
+        #A2[ ivec, ivec_all(y+2, x+1)] = yy/(ds**2)*(1-0.039*temp_diff[y,x])
+        #A2[ ivec, ivec_all(y+1, x  )] = xx/(ds**2)*(1-0.039*temp_diff[y,x])
+        #A2[ ivec, ivec_all(y+1, x+2)] = xx/(ds**2)*(1-0.039*temp_diff[y,x])
+        A2[ ivec, ivec_all(y+1, x+1)] = -(2*xx+2*yy)/(ds**2)*(1-0.0*temp_diff[y,x])
+        A2[ ivec, ivec_all(y  , x+1)] = yy/(ds**2)*(1-0.0*temp_diff[y,x])
+        A2[ ivec, ivec_all(y+2, x+1)] = yy/(ds**2)*(1-0.0*temp_diff[y,x])
+        A2[ ivec, ivec_all(y+1, x  )] = xx/(ds**2)*(1-0.0*temp_diff[y,x])
+        A2[ ivec, ivec_all(y+1, x+2)] = xx/(ds**2)*(1-0.0*temp_diff[y,x])
+
     A2=sp.csr_matrix(A2)
 
     A = A2.dot(A1)
@@ -109,11 +116,11 @@ def getPDEMatrix(h, w, xx, yy, ds):
 
 class PDE(object):
 
-    def __init__(self, h, w, xx, yy, ds):
+    def __init__(self, h, w, xx, yy, ds, ref_temp, temp_array):
         self.h = h
         self.w = w
         self.shape = (h*w,)
-        self.A, self.R, self.Dinv = getPDEMatrix(h,w,xx,yy,ds) 
+        self.A, self.R, self.Dinv = getPDEMatrix(h,w,xx,yy,ds,ref_temp,temp_array)
         self.handl = cusp.Sparse()         
         self.descr = self.handl.matdescr() # matrix descriptor
 

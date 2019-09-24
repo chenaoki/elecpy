@@ -111,6 +111,8 @@ class MonodomainSimulator(object):
                 vmem = f[group_id]['vmem'].value.flatten()
                 cells.load(f, group_id)
             cnt_udt = cnt_restart * cnt_log
+            if 'temp_src' in sim_params['restart']:
+                temp_src = sim_params['restart']['temp_src']
         print "...done"
 
         print "Mask settings...",
@@ -123,7 +125,7 @@ class MonodomainSimulator(object):
         print "...done"
 
         print 'Building PDE system ...',
-        pde_i = PDE( im_h, im_w, sigma_l_i, sigma_t_i, ds )
+        pde_i = PDE( im_h, im_w, sigma_l_i, sigma_t_i, ds, 310.15, cells.get_param('temp').reshape((im_h, im_w)) )
         print '...done'
 
         # Initialization
@@ -176,6 +178,10 @@ class MonodomainSimulator(object):
                     outf[group_id].create_dataset('vmem', data = vmem.reshape((im_h, im_w)))
                     cells.save(outf, group_id)
                     yield vmem
+
+                    if 'temp_src' in sim_params['restart']:
+                        cells.set_param('temp', np.load(os.path.join(temp_src, '{0:04d}.npy'.format(int(t)))).flatten())
+                        pde_i = PDE( im_h, im_w, sigma_l_i, sigma_t_i, ds, 310.15, cells.get_param('temp').reshape((im_h, im_w)) )
 
                     flg = False
                     for i,v in enumerate(vmem):
