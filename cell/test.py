@@ -1,5 +1,6 @@
 import os, json, time
 import numpy as np
+import h5py
 from optparse import OptionParser
 
 from luorudy.model import model as luorudy
@@ -44,35 +45,38 @@ def test(pacing_params, savepath):
     steps = int((st_inter*st_train)/dt)      # Number of loop
     start = time.time()
     cnt = 0
-
-    for step in range(steps):
-    #for step in range(1):
     
-        # Stimulation setting
-        if int( (t - st_start)/dt ) % int(st_inter/dt) == 0:
-            st_on = True
-        if st_on:
-            model.set_param('st', st_amp)
-            st_time += dt
-            if st_time > st_dur:
-                st_on = False
-                st_time = 0.0
-        else: # st_on
-            model.set_param('st', 0.)
+    with h5py.File(os.path.join(savepath, 'out.h5'),'w') as outf:
+        for step in range(steps):
+        #for step in range(1):
 
-        # State transition
-        model.update()
+            # Stimulation setting
+            if int( (t - st_start)/dt ) % int(st_inter/dt) == 0:
+                st_on = True
+            if st_on:
+                model.set_param('st', st_amp)
+                st_time += dt
+                if st_time > st_dur:
+                    st_on = False
+                    st_time = 0.0
+            else: # st_on
+                model.set_param('st', 0.)
 
-        if step % log_cnt == 0:
-            cnt += 1
-            model.save(os.path.join(savepath, '{0:0>5}'.format(cnt)))
-            if cnt % 100 == 0:
-                print '-------------{0}'.format(cnt)
-                print 'v:', model.get_param('v')[0,0]
-                print 'it:',model.get_param('it')[0,0]
-                print 'st:',model.get_param('st')[0,0]
+            # State transition
+            model.update()
 
-        t += dt
+            if step % log_cnt == 0:
+                cnt += 1
+                group_id = '{0:0>5}'.format(cnt)
+                outf.create_group(group_id)
+                model.save(outf, group_id)
+                if cnt % 100 == 0:
+                    print '-------------{0}'.format(cnt)
+                    print 'v:', model.get_param('v')[0,0]
+                    print 'it:',model.get_param('it')[0,0]
+                    print 'st:',model.get_param('st')[0,0]
+
+            t += dt
 
     elapsed_time = time.time() - start
     print 'elapsed_time:', elapsed_time
