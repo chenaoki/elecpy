@@ -140,8 +140,9 @@ def sim_generator( params ):
         srcpath = sim_params['restart']['source']
         with h5py.File(os.path.join(srcpath, 'out.h5'), 'r') as f:
             group_id = '{0:0>4}'.format(cnt_restart)
-            phie = f[group_id]['phie'].value.flatten()
             vmem = f[group_id]['vmem'].value.flatten()
+            if 'phie' in f[group_id].keys():
+                phie = f[group_id]['phie'].value.flatten()
             cells.load(f, group_id)
         cnt_udt = cnt_restart * cnt_log
     print "...done"
