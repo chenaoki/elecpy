@@ -52,6 +52,7 @@ class model(cellmodel):
             'xiNaCa',
             'xica',
             'xiNaK',
+            'c_sodium',
             'c_brugada',
             'sw_it'
         ]
