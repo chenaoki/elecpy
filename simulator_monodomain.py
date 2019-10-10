@@ -98,6 +98,7 @@ class MonodomainSimulator(object):
         #print("Allocating data...")
         cells.create()
         i_ion              = np.zeros((N),dtype=np.float64)
+        phie               = np.zeros((N),dtype=np.float64)
         i_ext_e            = np.zeros((N),dtype=np.float64)
         i_ext_i            = np.zeros((N),dtype=np.float64)
         rhs_vmem           = np.zeros((N),dtype=np.float64)
