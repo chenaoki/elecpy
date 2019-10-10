@@ -202,7 +202,7 @@ double _sparkV = exp(-{ay_}*(_v+30.0000))/(1.00000+exp(-{ay_}*(_v+30.0000)));
 double _sparkrate = ({gryr_}/1.00000)*_po*_rxa2*_sparkV;
 
 // calculate currents
-_xina = _gna*h*j*m*m*m*(_v-_ena);
+_xina = _gna*h*j*m*m*m*(_v-_ena)*c_sodium;
 _xiks = _gks*_gksx*xs1*xs2*(_v-_eks);
 _xik1 = _gkix*pow(({ko_}/5.40000), 1.0/2)*_xkin*(_v-_ek);
 _xikr = _gkr*pow(({ko_}/5.40000), 1.0/2)*xr*_rg*(_v-_ek);
@@ -275,5 +275,6 @@ _v -= _it * dt;
 _dt = dt;
 _st = st;
 _temp = temp;
+_c_sodium = c_sodium;
 _c_brugada = c_brugada;
 _sw_it = sw_it;
