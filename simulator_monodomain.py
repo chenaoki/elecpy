@@ -6,17 +6,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import chainer
 import h5py
+import time
 from chainer import cuda
 from matplotlib import animation
 from optparse import OptionParser
 
-from solver.PDE import PDE
-from stim.MembraneStimulator import MembraneStimulator
-from cell.ohararudy.model import model as cell_model_ohararudy
-from cell.luorudy.model import model as cell_model_luorudy
-from cell.mahajan.model import model as cell_model_mahajan
-from cell.courtmanche.model import model as cell_model_courtmanche
-from util.cmap_bipolar import bipolar
+from .solver.PDE import PDE
+from .stim.MembraneStimulator import MembraneStimulator
+from .cell.ohararudy.model import model as cell_model_ohararudy
+from .cell.luorudy.model import model as cell_model_luorudy
+from .cell.mahajan.model import model as cell_model_mahajan
+from .cell.courtmanche.model import model as cell_model_courtmanche
+from .util.cmap_bipolar import bipolar
 
 # global variables
 class MonodomainSimulator(object):
@@ -42,7 +43,7 @@ class MonodomainSimulator(object):
         sim_params = self.sim_params
         assert sim_params is not None
 
-        print "elecpy simulation start!"
+        #print("elecpy simulation start!")
 
         cuda.get_device(0).use()
 
@@ -66,6 +67,7 @@ class MonodomainSimulator(object):
         # Logging settings
         cnt_log      = sim_params['log']['cnt']      # num of udt for logging
         savepath     = sim_params['log']['path']
+        save_all     = sim_params['log']['save_all']
     
         # Create result folder
         if not os.path.isdir(savepath) :
@@ -84,7 +86,7 @@ class MonodomainSimulator(object):
             cells = cell_model_courtmanche((N))
         assert cells is not None
 
-        print "Stimulation settings",
+        #print("Stimulation settings")
         stims_ext = []
         stims_mem = []
         if 'stimulation' in sim_params.keys():
@@ -94,9 +96,9 @@ class MonodomainSimulator(object):
                     stim = MembraneStimulator(**param)
                     assert tuple(stim.shape) == (im_h, im_w)
                     stims_mem.append(stim)
-        print "...done"
+        #print("...done")
 
-        print "Allocating data...",
+        #print("Allocating data...")
         cells.create()
         i_ion              = np.zeros((N),dtype=np.float64)
         phie               = np.zeros((N),dtype=np.float64)
@@ -104,9 +106,9 @@ class MonodomainSimulator(object):
         i_ext_i            = np.zeros((N),dtype=np.float64)
         rhs_vmem           = np.zeros((N),dtype=np.float64)
         vmem               = np.copy(cells.get_param('v'))
-        print "...done"
+        #print("...done")
 
-        print "Initializing data...",
+        #print("Initializing data...")
         if 'restart' in sim_params.keys():
             cnt_restart = sim_params['restart']['count']
             srcpath = sim_params['restart']['source']
@@ -115,20 +117,20 @@ class MonodomainSimulator(object):
                 vmem = f[group_id]['vmem'].value.flatten()
                 cells.load(f, group_id)
             cnt_udt = cnt_restart * cnt_log
-        print "...done"
+        #print("...done")
 
-        print "Mask settings...",
+        #print("Mask settings...")
         if 'mask' in sim_params.keys():
             mask_param = sim_params['mask']
             for key in mask_param.keys():
                 array = np.load(mask_param[key])
                 assert array.shape == (im_h, im_w)
                 cells.set_param(key, array.flatten())
-        print "...done"
+        #print("...done")
 
-        print 'Building PDE system ...',
+        #print("Building PDE system ...")
         pde_i = PDE( im_h, im_w, sigma_l_i, sigma_t_i, ds )
-        print '...done'
+        #print("...done")
 
         # Initialization
         t         = 0.                       # Time (ms)
@@ -136,7 +138,7 @@ class MonodomainSimulator(object):
         dstep     = 1                        # Time step (# of udt)
         cnt_save  = -1
 
-        print 'Main loop start!'
+        #print("Main loop start!")
         with h5py.File(os.path.join(savepath, 'out.h5'),'w') as outf:
             
             while t < time_end:
@@ -177,20 +179,25 @@ class MonodomainSimulator(object):
                 cnt_save_now = self.conv_time2cntSave(t)
                 if cnt_save_now != cnt_save:
                     cnt_save = cnt_save_now
-                    sys.stdout.write('\r------------------{0}/{1}ms'.format(t, time_end))
-                    sys.stdout.flush()
+                    #sys.stdout.write('\r------------------{0}/{1}ms'.format(t, time_end))
+                    #sys.stdout.flush()
 
-                    group_id = '{0:0>4}'.format(cnt_save)
+                    group_id = '{0:0>4}'.format(int(cnt_save))
                     outf.create_group(group_id)
                     outf[group_id].create_dataset('vmem', data = vmem.reshape((im_h, im_w)))
+<<<<<<< HEAD
                     outf[group_id].create_dataset('phie', data = phie.reshape((im_h, im_w)))
                     cells.save(outf, group_id)
+=======
+                    if save_all is True:
+                        cells.save(outf, group_id)
+>>>>>>> change script for python3
                     yield vmem
 
                     flg = False
                     for i,v in enumerate(vmem):
                         if v != v :
-                            print "error : invalid value {1} @ {0} ms, index {2}".format(t, v, i)
+                            print("error : invalid value {1} @ {0} ms, index {2}".format(t, v, i))
                             flg = True
                             break
                     if flg is True:
@@ -198,6 +205,6 @@ class MonodomainSimulator(object):
 
                 cnt_udt += dstep
 
-            print "elecpy done"
+            #print("elecpy done")
             yield False
 
