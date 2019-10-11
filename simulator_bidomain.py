@@ -10,13 +10,13 @@ from chainer import cuda
 from matplotlib import animation
 from optparse import OptionParser
 
-from solver.PDE import PDE
-from stim.ExtracellularStimulator import ExtracellularStimulator
-from stim.MembraneStimulator import MembraneStimulator
-from cell.ohararudy.model import model as cell_model_ohararudy
-from cell.luorudy.model import model as cell_model_luorudy
-from cell.mahajan.model import model as cell_model_mahajan
-from util.cmap_bipolar import bipolar
+from .solver.PDE import PDE
+from .stim.ExtracellularStimulator import ExtracellularStimulator
+from .stim.MembraneStimulator import MembraneStimulator
+from .cell.ohararudy.model import model as cell_model_ohararudy
+from .cell.luorudy.model import model as cell_model_luorudy
+from .cell.mahajan.model import model as cell_model_mahajan
+from .util.cmap_bipolar import bipolar
 
 # global variables
 class BidomainSimulator(object):
@@ -42,7 +42,7 @@ class BidomainSimulator(object):
         sim_params = self.sim_params
         assert sim_params is not None
 
-        print "elecpy simulation start!"
+        print("elecpy simulation start!")
 
         cuda.get_device(0).use()
 
@@ -83,7 +83,7 @@ class BidomainSimulator(object):
             cells = cell_model_mahajan((N))
         assert cells is not None
 
-        print "Stimulation settings",
+        print("Stimulation settings")
         stims_ext = []
         stims_mem = []
         if 'stimulation' in sim_params.keys():
@@ -98,9 +98,9 @@ class BidomainSimulator(object):
                     stim = MembraneStimulator(**param)
                     assert tuple(stim.shape) == (im_h, im_w)
                     stims_mem.append(stim)
-        print "...done"
+        print("...done")
 
-        print "Allocating data...",
+        print("Allocating data...")
         cells.create()
         i_ion              = np.zeros((N),dtype=np.float64)
         phie               = np.zeros((N),dtype=np.float64)
@@ -110,9 +110,9 @@ class BidomainSimulator(object):
         rhs_vmem           = np.zeros((N),dtype=np.float64)
         tone               = np.zeros((N),dtype=np.float64)
         vmem               = np.copy(cells.get_param('v'))
-        print "...done"
+        print("...done")
 
-        print "Initializing data...",
+        print("Initializing data...")
         if 'restart' in sim_params.keys():
             cnt_restart = sim_params['restart']['count']
             srcpath = sim_params['restart']['source']
@@ -122,23 +122,23 @@ class BidomainSimulator(object):
                 vmem = f[group_id]['vmem'].value.flatten()
                 cells.load(f, group_id)
             cnt_udt = cnt_restart * cnt_log
-        print "...done"
+        print("...done")
 
-        print "Mask settings...",
+        print("Mask settings...")
         if 'mask' in sim_params.keys():
             mask_param = sim_params['mask']
             for key in mask_param.keys():
                 array = np.load(mask_param[key])
                 assert array.shape == (im_h, im_w)
                 cells.set_param(key, array.flatten())
-        print "...done"
+        print("...done")
 
-        print 'Building PDE system ...',
+        print("Building PDE system ...")
         sigma_l      = sigma_l_e + sigma_l_i
         sigma_t      = sigma_t_e + sigma_t_i
         pde_i = PDE( im_h, im_w, sigma_l_i, sigma_t_i, ds )
         pde_m = PDE( im_h, im_w, sigma_l,   sigma_t,   ds )
-        print '...done'
+        print("...done")
 
         # Initialization
         t         = 0.                       # Time (ms)
@@ -150,7 +150,7 @@ class BidomainSimulator(object):
         flg_st    = False                    # Flaf of stimulation
         cnt_st_off = 0
 
-        print 'Main loop start!'
+        print("Main loop start!")
         with h5py.File(os.path.join(savepath, 'out.h5'),'w') as outf:
             
             while t < time_end:
@@ -203,7 +203,7 @@ class BidomainSimulator(object):
                     flg = False
                     for i,v in enumerate(vmem):
                         if v != v :
-                            print "error : invalid value {1} @ {0} ms, index {2}".format(t, v, i)
+                            print("error : invalid value {1} @ {0} ms, index {2}".format(t, v, i))
                             flg = True
                             break
                     if flg is True:
@@ -229,6 +229,6 @@ class BidomainSimulator(object):
 
                 cnt_udt += dstep
 
-            print "elecpy done"
+            print("elecpy done")
             yield False
 

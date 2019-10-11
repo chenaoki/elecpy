@@ -1,4 +1,4 @@
-from Stimulator import Stimulator
+from .Stimulator import Stimulator
 
 class MembraneStimulator(Stimulator):
     
@@ -51,7 +51,7 @@ class MembraneStimulator(Stimulator):
         assert width > 0 and width < self.shape[0]
         self._map_on[-width:,:] = self.amplitude
 
-    def set_point( self, ( y, x, rad) ):
+    def set_point( self, y, x, rad ):
         assert x >= rad and x + rad <= self.shape[0]
         assert y >= rad and y + rad <= self.shape[1]
         self._map_on[x-rad:x+rad,y-rad:y+rad] = self.amplitude

@@ -195,7 +195,7 @@ if __name__ == '__main__':
 
     def draw(data):
         i, img = tuple(data)
-        print i
+        print (i)
         im.set_array(img)
         return [im]
 
