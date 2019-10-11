@@ -114,7 +114,7 @@ class MonodomainSimulator(object):
             srcpath = sim_params['restart']['source']
             with h5py.File(os.path.join(srcpath, 'out.h5'), 'r') as f:
                 group_id = '{0:0>4}'.format(cnt_restart)
-                vmem = f[group_id]['vmem'].value.flatten()
+                vmem = f[group_id]['vmem'][()].flatten()
                 cells.load(f, group_id)
             cnt_udt = cnt_restart * cnt_log
         #print("...done")
@@ -185,13 +185,10 @@ class MonodomainSimulator(object):
                     group_id = '{0:0>4}'.format(int(cnt_save))
                     outf.create_group(group_id)
                     outf[group_id].create_dataset('vmem', data = vmem.reshape((im_h, im_w)))
-<<<<<<< HEAD
                     outf[group_id].create_dataset('phie', data = phie.reshape((im_h, im_w)))
                     cells.save(outf, group_id)
-=======
                     if save_all is True:
                         cells.save(outf, group_id)
->>>>>>> change script for python3
                     yield vmem
 
                     flg = False
