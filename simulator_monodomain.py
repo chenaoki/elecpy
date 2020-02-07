@@ -12,7 +12,6 @@ from matplotlib import animation
 from optparse import OptionParser
 
 from .solver.PDE_dev import PDE
-#from .solver.PDE import PDE
 from .stim.MembraneStimulator import MembraneStimulator
 from .cell.ohararudy.model import model as cell_model_ohararudy
 from .cell.luorudy.model import model as cell_model_luorudy
@@ -181,8 +180,8 @@ class MonodomainSimulator(object):
                 cnt_save_now = self.conv_time2cntSave(t)
                 if cnt_save_now != cnt_save:
                     cnt_save = cnt_save_now
-                    sys.stdout.write('\r------------------{0}/{1}ms'.format(t, time_end))
-                    sys.stdout.flush()
+                    #sys.stdout.write('\r------------------{0}/{1}ms'.format(t, time_end))
+                    #sys.stdout.flush()
 
                     group_id = '{0:0>4}'.format(int(cnt_save))
                     outf.create_group(group_id)
