@@ -11,7 +11,8 @@ from chainer import cuda
 from matplotlib import animation
 from optparse import OptionParser
 
-from .solver.PDE import PDE
+from .solver.PDE_dev import PDE
+#from .solver.PDE import PDE
 from .stim.MembraneStimulator import MembraneStimulator
 from .cell.ohararudy.model import model as cell_model_ohararudy
 from .cell.luorudy.model import model as cell_model_luorudy
@@ -125,7 +126,15 @@ class MonodomainSimulator(object):
         #print("...done")
 
         #print("Building PDE system ...")
-        pde_i = PDE( im_h, im_w, sigma_l_i, sigma_t_i, ds )
+        N_all = (im_h+2)*(im_w+2)
+        sigma_l_i_array = np.ones((N_all),dtype=np.float64)*sigma_l_i
+        sigma_t_i_array = np.ones((N_all),dtype=np.float64)*sigma_t_i
+        fiber_angle = np.ones((N_all),dtype=np.float64)*0
+
+        sw_it = cells.get_param('sw_it')
+
+        pde_i = PDE( im_h, im_w, sigma_l_i_array, sigma_t_i_array, ds, fiber_angle, sw_it )
+        #pde_i = PDE( im_h, im_w, sigma_l_i, sigma_t_i, ds )
         #print("...done")
 
         # Initialization
@@ -141,6 +150,7 @@ class MonodomainSimulator(object):
 
                 t = self.conv_cntUdt2time(cnt_udt)
                 dt = dstep * udt
+                cycle_num = dt / 0.002
 
                 # Stimulation control
                 i_ext_e[:] = 0.0
@@ -149,12 +159,13 @@ class MonodomainSimulator(object):
                     i_ext_e += s.get_current(t)*Sv
                     flg_st_temp = flg_st_temp or s.get_flag(t)
                 for s in stims_mem:
-                    cells.set_param('st', s.get_current(t)) 
+                    cells.set_param('st', s.get_current(t))
 
                 # step.1 cell state transition
-                cells.set_param('dt', dt )
+                cells.set_param('dt', dt / cycle_num)
                 cells.set_param('v', cuda.to_gpu(vmem) )
-                cells.update()
+                for i in range(int(cycle_num)):
+                    cells.update()
                 i_ion = cells.get_param('it')
 
                 # step.3 vmem
@@ -170,8 +181,8 @@ class MonodomainSimulator(object):
                 cnt_save_now = self.conv_time2cntSave(t)
                 if cnt_save_now != cnt_save:
                     cnt_save = cnt_save_now
-                    #sys.stdout.write('\r------------------{0}/{1}ms'.format(t, time_end))
-                    #sys.stdout.flush()
+                    sys.stdout.write('\r------------------{0}/{1}ms'.format(t, time_end))
+                    sys.stdout.flush()
 
                     group_id = '{0:0>4}'.format(int(cnt_save))
                     outf.create_group(group_id)
