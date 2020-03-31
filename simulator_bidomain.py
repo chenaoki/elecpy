@@ -81,6 +81,8 @@ class BidomainSimulator(object):
             cells = cell_model_luorudy((N))
         if sim_params['cell_type'] == 'mahajan':
             cells = cell_model_mahajan((N))
+        if sim_params['cell_type'] == 'courtmanche':
+            cells = cell_model_courtmanche((N))
         assert cells is not None
 
         print("Stimulation settings")

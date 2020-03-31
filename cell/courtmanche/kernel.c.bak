@@ -1,0 +1,186 @@
+int _maskPosi;
+int _maskNega;
+
+_v = v;
+
+// Cell Geometry
+double _vcell = 1000*{pi_}*{a_}*{a_}*{l_};
+double _acap = (2*{pi_}*{a_}*{a_}+2*{pi_}*{a_}*{l_})*2;
+double _vmyo = _vcell*0.68;
+//double _vmito = _vcell*0.26;
+//double _vsr = _vcell*0.06;
+double _vnsr = _vcell*0.0552;
+double _vjsr = _vcell*0.0048;
+
+// comp_ina
+double _gna = 7.8;
+double _ena = (({R_}*{temp_})/{frdy_})*log({nao_}/nai);
+double _am = 0.32*(_v+47.13)/(1-exp(-0.1*(_v+47.13)));
+double _bm = 0.08*exp(-_v/11);
+
+_maskPosi = (_v < -40.0) * 1;
+_maskNega = (_maskPosi == 0) * 1;
+
+double _ah = (0.135*exp((80+v)/-6.8))*_maskPosi + 0.0*_maskNega ;
+double _bh = (3.56*exp(0.079*_v)+310000*exp(0.35*_v))*_maskPosi + (1/(0.13*(1+exp((_v+10.66)/-11.1))))*_maskNega;
+double _aj = ((-127140*exp(0.2444*_v)-0.00003474*exp(-0.04391*_v))*((_v+37.78)/(1+exp(0.311*(_v+79.23)))))*_maskPosi+0.0*_maskNega;
+double _bj = ((0.1212*exp(-0.01052*_v))/(1+exp(-0.1378*(_v+40.14))))*_maskPosi+((0.3*exp(-0.0000002535*_v))/(1+exp(-0.1*(_v+32))))*_maskNega;
+
+_h = _ah/(_ah+_bh)-((_ah/(_ah+_bh))-h)*exp(-dt/(1/(_ah+_bh)));
+_j = _aj/(_aj+_bj)-((_aj/(_aj+_bj))-j)*exp(-dt/(1/(_aj+_bj)));
+_m = _am/(_am+_bm)-((_am/(_am+_bm))-m)*exp(-dt/(1/(_am+_bm)));
+
+//comp_ical
+double _dss = 1/(1+exp(-(_v+10)/8));
+double _taud = (1-exp((_v+10)/-6.24))/(0.035*(_v+10)*(1+exp((_v+10)/-6.24)));
+double _fss = 1/(1+exp((_v+28)/6.9));
+double _tauf = 9/(0.0197*exp(-pow((0.0337*(_v+10)),2.0))+0.02);
+
+double _fcass = 1/(1+cai/0.00035);
+//double _taufca = 2;
+
+_d = _dss-(_dss-d)*exp(-dt/_taud);
+_f = _fss-(_fss-f)*exp(-dt/_tauf);
+_fca = _fcass-(_fcass-fca)*exp(-dt/_tauf);
+double _ibarca = {gcalbar_}*(_v-65);
+double _ilca = _d*_f*_fca*_ibarca;
+
+//comp_ikr ()
+double _gkr = 0.0294*sqrt({ko_}/5.4);
+double _kr = (({R_}*{temp_})/{frdy_})*log({ko_}/ki);
+double _xrss = 1/(1+exp(-(_v+14.1)/6.5));
+double _tauxr = 1/(0.0003*(_v+14.1)/(1-exp(-(_v+14.1)/5))+0.000073898*(_v-3.3328)/(exp((_v-3.3328)/5.1237)-1));
+_xr = _xrss-(_xrss-xr)*exp(-dt/_tauxr);
+double _r = 1/(1+exp((_v+15)/22.4));
+
+// comp_iks ()
+double _gks = 0.129;
+double _ks = (({R_}*{temp_})/{frdy_})*log({ko_}/ki);
+double _tauxs = 0.5/(0.00004*(_v-19.9)/(1-exp(-(_v-19.9)/17))+0.000035*(_v-19.9)/(exp((_v-19.9)/9)-1));
+double _xsss = 1/pow((1+exp(-(_v-19.9)/12.7)),0.5);
+_xs = _xsss-(_xsss-xs)*exp(-dt/_tauxs);
+
+//comp_iki ()
+_ki = (({R_}*{temp_})/{frdy_})*log({ko_}/ki);
+double _kin = 1/(1+exp(0.07*(_v+80)));
+
+//comp_ikach ()
+double _gkach = 0.135;
+double _kach = (({R_}*{temp_})/{frdy_})*log({ko_}/ki);
+double _alphayach= 1.232e-2/(1+0.0042/{ach_})+0.0002475;
+double _betayach = 0.01*exp(0.0133*(_v+40));
+double _tauyach = 1/(_alphayach+_betayach);
+double _yachss = _alphayach/(_alphayach+_betayach);
+_yach = _yachss-(_yachss-yach)*exp(-dt/_tauyach);
+
+//comp_ikur ()
+double _gkur = 0.005+0.05/(1+exp(-(_v-15)/13));
+double _ekur = (({R_}*{temp_})/{frdy_})*log({ko_}/ki);
+double _alphauakur = 0.65/(exp(-(_v+10)/8.5)+exp(-(_v-30)/59.0));
+double _betauakur = 0.65/(2.5+exp((_v+82)/17.0));
+double _tauuakur = 1/(3*(_alphauakur+_betauakur));
+double _uakurss = 1/(1+exp(-(_v+30.3)/9.6));
+double _alphauikur = 1/(21+exp(-(_v-185)/28));
+double _betauikur = exp((_v-158)/16);
+double _tauuikur = 1/(3*(_alphauikur+_betauikur));
+double _uikurss = 1/(1+exp((_v-99.45)/27.48));
+_uakur = _uakurss-(_uakurss-uakur)*exp(-dt/_tauuakur);
+_uikur = _uikurss-(_uikurss-uikur)*exp(-dt/_tauuikur);
+
+//comp_ito ()
+double _gito = 0.1652;
+double _revto = (({R_}*{temp_})/{frdy_})*log({ko_}/ki);
+double _alphaato = 0.65/(exp(-(_v+10)/8.5)+exp(-(_v-30)/59));
+double _betaato = 0.65/(2.5+exp((_v+82)/17));
+double _tauato = 1/(3*(_alphaato+_betaato));
+double _atoss = 1/(1+exp(-(_v+20.47)/17.54));
+_ato = _atoss-(_atoss-ato)*exp(-dt/_tauato);
+double _alphaiito = 1/(18.53+exp((_v+113.7)/10.95));
+double _betaiito = 1/(35.56+exp(-(_v+1.26)/7.44));
+double _tauiito = 1/(3*(_alphaiito+_betaiito));
+double _iitoss = 1/(1+exp((_v+43.1)/5.3));
+_iito = _iitoss-(_iitoss-iito)*exp(-dt/_tauiito);
+
+//comp_inak ()
+double _sigma = (exp({nao_}/67.3)-1)/7;
+double _fnak=(_v+150)/(_v+200);
+
+//comp_ipca ()
+double _ipca = ({ibarpca_}*cai)/({kmpca_}+cai);
+
+//comp_icab ()
+double _gcab = 0.00113;
+double _ecan = (({R_}*{temp_})/{frdy_})*log({cao_}/cai);
+double _icab = _gcab*(_v-_ecan);
+
+//comp_inab ()
+double _gnab = 0.000674;
+double _nan = (({R_}*{temp_})/{frdy_})*log({nao_}/nai);
+
+
+//comp_it ()
+_maskPosi = (_v < -40.0) * 1;
+_maskNega = (_maskPosi == 0) * 1;
+double _naiont = ina+inab+3*inak+3*inaca+1.5e-2;
+double _kiont = ikr+iks+iki-2*inak+ito+ikur+ikach+1.5e-2;
+double _caiont = _ilca+_icab+_ipca-2*inaca;
+
+// calculate currents
+_ina = _gna*m*m*m*h*j*(_v-_ena);
+_ilcatot = _ilca;
+_ikr = _gkr*xr*_r*(_v-({ekr_}))*fibro;
+_iks = _gks*xs*xs*(_v-({eks_}));
+_iki = {gki_}*_kin*(_v-({eki_}));
+_ikach = _gkach*yach*(_v-({ekach_}))/(1+exp((_v+20)/20));
+_ikur = _gkur*uakur*uakur*uakur*uikur*(_v-_ekur);
+_ito = _gito*ato*ato*ato*iito*(_v-({erevto_}));
+_inaca = 1750*(exp({gammas_}*{frdy_}*_v/({R_}*{temp_}))*nai*nai*nai*{cao_}-exp(({gammas_}-1)*{frdy_}*_v/({R_}*{temp_}))*{nao_}*{nao_}*{nao_}*cai)/((pow({kmnancx_},3.0)+pow({nao_},3.0))*({kmcancx_}+{cao_})*(1+{ksatncx_}*exp(({gammas_}-1)*{frdy_}*_v/({R_}*{temp_}))));
+_inak = {ibarnak_}*_fnak*(1/(1+pow(({kmnai_}/nai),1.5)))*({ko_}/({ko_}+{kmko_}));
+_inab = _gnab*(_v-_ena);
+_it = st+_naiont+_kiont+_caiont;
+
+//void conc_nsr ()
+double _kleak = {iupbar_}/{nsrbar_};
+double _ileak = _kleak*nsr;
+
+double _iup = {iupbar_}*cai/(cai+{kmup_});
+double _fn = _vjsr*(1e-12)*ireljsrol-(1e-12)*_caiont*_acap/(2*{frdy_});
+double _tauurel = 8.0;
+double _urelss = 1/(1+exp(-(_fn-3.4175e-13)/13.67e-16));
+double _tauvrel = 1.91+2.09/(1+exp(-(_fn-3.4175e-13)/13.67e-16));
+double _vrelss = 1-1/(1+exp(-(_fn-6.835e-14)/13.67e-16));
+double _tauwrel = 6.0*(1-exp(-(_v-7.9)/5))/((1+0.3*exp(-(_v-7.9)/5))*(_v-7.9));
+double _wrelss = 1-1/(1+exp(-(_v-40)/17));
+_urel = _urelss-(_urelss-urel)*exp(-dt/_tauurel);
+_vrel = _vrelss-(_vrelss-vrel)*exp(-dt/_tauvrel);
+_wrel = _wrelss-(_wrelss-wrel)*exp(-dt/_tauwrel);
+double _greljsrol = {grelbarjsrol_}*urel*urel*vrel*wrel;
+_ireljsrol = _greljsrol*(jsr-cai);
+
+//calc_itr ()
+double _itr = (nsr-jsr)/{tautr_};
+
+//conc_cai ()
+_trpn = {trpnbar_}*(cai/(cai+{kmtrpn_}));
+_cmdn = {cmdnbar_}*(cai/(cai+{kmcmdn_}));
+double _b1cai = -_caiont*_acap/(2*{frdy_}*_vmyo)+(_vnsr*(_ileak-_iup)+0.5*ireljsrol*_vjsr)/_vmyo; //LAI
+double _b2cai = 1+{trpnbar_}*{kmtrpn_}/pow((cai+{kmtrpn_}),2.0)+cmdn*{kmcmdn_}/pow((cai+{kmcmdn_}),2.0);
+
+// calculate difference
+double _dnai = -dt*_naiont*_acap/(_vmyo*{zna_}*{frdy_});
+double _dki = -dt*_kiont*_acap/(_vmyo*{zk_}*{frdy_});
+double _dnsr = dt*(_iup-_ileak-_itr*_vjsr/_vnsr);
+double _djsr = dt*(_itr-0.5*ireljsrol)/(1+{csqnbar_}*{kmcsqn_}/pow((jsr+{kmcsqn_}),2.0)); //LAI
+double _dcai = dt*_b1cai/_b2cai;
+
+// rewrite status
+_nai = _dnai + nai;
+_ki = _dki + ki;
+_nsr = _dnsr+nsr;
+_jsr = _djsr+jsr;
+_cai = _dcai+cai;
+_dt = dt;
+_v -= _it*dt;
+_st = st;
+_it=_it;
+_fibro=fibro;
