@@ -16,6 +16,7 @@ from stim.MembraneStimulator import MembraneStimulator
 from cell.ohararudy.model import model as cell_model_ohararudy
 from cell.luorudy.model import model as cell_model_luorudy
 from cell.mahajan.model import model as cell_model_mahajan
+from cell.courtmanche.model import model as cell_model_courtmanche
 from util.cmap_bipolar import bipolar
 
 # global variables
@@ -81,6 +82,8 @@ class BidomainSimulator(object):
             cells = cell_model_luorudy((N))
         if sim_params['cell_type'] == 'mahajan':
             cells = cell_model_mahajan((N))
+        if sim_params['cell_type'] == 'courtmanche':
+            cells = cell_model_courtmanche((N))
         assert cells is not None
 
         print "Stimulation settings",

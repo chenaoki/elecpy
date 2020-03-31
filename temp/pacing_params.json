@@ -1,15 +1,15 @@
 {
-    "time" : {
-        "dt" :0.005,
-        "log_cnt" : 200
-    },
-    "cell_type" : "luorudy",
-    "cell_param":{},
-    "stim" : {
-        "start": 0.0,
-        "duration": 0.5,
-        "interval": 400.0,
-        "train" : 20,
-        "amplitude": -80.0
+    "cell_param": {}, 
+    "cell_type": "courtmanche", 
+    "stim": {
+        "duration": 2.0, 
+        "start": 0.0, 
+        "train": 30, 
+        "interval": 400.0, 
+        "amplitude": -20.0
+    }, 
+    "time": {
+        "dt": 0.005, 
+        "log_cnt": 200
     }
 }

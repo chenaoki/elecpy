@@ -15,6 +15,7 @@ from stim.MembraneStimulator import MembraneStimulator
 from cell.ohararudy.model import model as cell_model_ohararudy
 from cell.luorudy.model import model as cell_model_luorudy
 from cell.mahajan.model import model as cell_model_mahajan
+from cell.courtmanche.model import model as cell_model_courtmanche
 from util.cmap_bipolar import bipolar
 
 # global variables
@@ -79,6 +80,8 @@ class MonodomainSimulator(object):
             cells = cell_model_luorudy((N))
         if sim_params['cell_type'] == 'mahajan':
             cells = cell_model_mahajan((N))
+        if sim_params['cell_type'] == 'courtmanche':
+            cells = cell_model_courtmanche((N))
         assert cells is not None
 
         print "Stimulation settings",
@@ -146,8 +149,13 @@ class MonodomainSimulator(object):
                 for s in stims_ext:
                     i_ext_e += s.get_current(t)*Sv
                     flg_st_temp = flg_st_temp or s.get_flag(t)
+                
+                array_mem = np.zeros(im_h*im_w)
                 for s in stims_mem:
-                    cells.set_param('st', s.get_current(t)) 
+                    #cells.set_param('st', s.get_current(t)) 
+                    array_mem += s.get_current(t)
+                mask_mem = (np.abs(array_mem) > 0.0)*1.0
+                vmem = mask_mem * array_mem + (1.0-mask_mem)*vmem
 
                 # step.1 cell state transition
                 cells.set_param('dt', dt )
