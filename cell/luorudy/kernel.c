@@ -373,6 +373,7 @@ _xr = sw_it*_xr + (sw_it == 0)*{xr_};
 _xs1 = sw_it*_xs1 + (sw_it == 0)*{xs1_};
 _xs2 = sw_it*_xs2 + (sw_it == 0)*{xs2_};
 _st = st;
+
 _itr = sw_it*_itr + (sw_it == 0)*{itr_};
 _nsr = sw_it*_nsr + (sw_it == 0)*{nsr_};
 _ryrCone = sw_it*_ryrCone + (sw_it == 0)*{ryrCone_};
@@ -392,3 +393,4 @@ _it = sw_it*_it + (sw_it == 0)*{it_};
 _ina = sw_it*_ina + (sw_it == 0)*{ina_};
 _c_brugada = c_brugada;
 _sw_it= sw_it;
+_temp = temp;
