@@ -224,8 +224,8 @@ double _inab = ({gnab_}*(_v-_ena))*pow({Q10K1_}, (temp-{temp_})/10.0);
 double _naoint = _ina+_inab+_ilcana+3*_inak+3*_inaca+3*_inacass;
 double _koint = _ikr+_iks+_iki+_ikp+_ilcak-2*_inak;
 double _caiont = _ilca+_icab+_ipca+_icat-2*_inaca-2*_inacass;
-_it = _naoint+_koint+_caiont+st;
-/*
+_it = sw_it*(_naoint+_koint+_caiont+st);
+
 //def conc_nai
 double _dnai = -dt*(((_naoint-3*_inacass-_ilcana)*{acap_})/({vmyo_}*{zna_}*{frdy_})-_idiffna*({volrss_}/{vmyo_}));
 _nai = _dnai + nai;
@@ -341,4 +341,5 @@ _v -= _it*dt;
 _dt = dt;
 _st = st;
 _temp = temp;
-*/
+_c_brugada = c_brugada;
+_sw_it= sw_it;

@@ -99,6 +99,7 @@ class MonodomainSimulator(object):
         print "Allocating data...",
         cells.create()
         i_ion              = np.zeros((N),dtype=np.float64)
+        phie               = np.zeros((N),dtype=np.float64)
         i_ext_e            = np.zeros((N),dtype=np.float64)
         i_ext_i            = np.zeros((N),dtype=np.float64)
         rhs_vmem           = np.zeros((N),dtype=np.float64)
@@ -182,6 +183,7 @@ class MonodomainSimulator(object):
                     group_id = '{0:0>4}'.format(cnt_save)
                     outf.create_group(group_id)
                     outf[group_id].create_dataset('vmem', data = vmem.reshape((im_h, im_w)))
+                    outf[group_id].create_dataset('phie', data = phie.reshape((im_h, im_w)))
                     cells.save(outf, group_id)
                     yield vmem
 
