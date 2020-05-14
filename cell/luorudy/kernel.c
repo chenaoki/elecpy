@@ -27,6 +27,9 @@ _maskPosi =  ( _v > -30.0 -0.001 ) * 1;
 _maskPosi *= ( _v <= -30.0 ) * 1;
 _maskNega = ( _maskPosi == 0 ) * 1;
 _v = _maskPosi * (-30.0-0.001) + _maskNega * _v;
+_maskPosi *= ( _v <= -86.24 ) * 1;
+_maskNega = ( _maskPosi == 0 ) * 1;
+_v = _maskPosi * (-86.24+0.001) + _maskNega * _v;
 
 // comp_ina ()
 double _shift_inf_m = {SINFM_}*(temp-{temp_});
@@ -335,10 +338,10 @@ double _dcai = -dt*_buffersmyo*((((_caiont-_ilca+2*_inacass)*{acap_})/({vmyo_}*{
 _cai = cai+_dcai;
 
 // Membrane voltage update
-_v -= _it*dt;
+//_v -= _it*dt;
 
 // unmodified return variables
-_v = sw_it*_v + (sw_it == 0)*{v_};
+//_v = sw_it*_v + (sw_it == 0)*{v_};
 _temp = temp;
 _nai = sw_it*_nai + (sw_it == 0)*{nai_};
 _dt = dt;
