@@ -137,6 +137,8 @@ class MonodomainSimulator(object):
 
         sw_it = cells.get_param('sw_it')
 
+        vmem = vmem*(sw_it==1) + np.ones_like(vmem)*(sw_it==0)*(-86.24)
+
         pde_i = PDE( im_h, im_w, sigma_l_i_array, sigma_t_i_array, ds, fiber_angle, sw_it )
         #pde_i = PDE( im_h, im_w, sigma_l_i, sigma_t_i, ds )
         #print("...done")
@@ -149,12 +151,12 @@ class MonodomainSimulator(object):
 
         #print("Main loop start!")
         with h5py.File(os.path.join(savepath, 'out.h5'),'w') as outf:
-            
+
             while t < time_end:
 
                 t = self.conv_cntUdt2time(cnt_udt)
                 dt = dstep * udt
-                cycle_num = dt / 0.002
+                cycle_num = dt / 0.001
 
                 # Stimulation control
                 i_ext_e[:] = 0.0
@@ -184,7 +186,7 @@ class MonodomainSimulator(object):
                 rhs_vmem *= 1 / (1+sigma_mu)
                 rhs_vmem -= i_ion * Sv
                 rhs_vmem *= 1 / (Cm * Sv)
-                vmem += dt * rhs_vmem
+                vmem += dt * rhs_vmem * sw_it
 
                 # Logging & error check
                 cnt_save_now = self.conv_time2cntSave(t)
