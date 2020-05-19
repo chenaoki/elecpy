@@ -74,7 +74,9 @@ const_d = {
   'APD_change_ina_':1.0,
   'APD_change_ikur_':3.0,
   'APD_change_ilca_':0.5,
-  
+  'thickness_':1.0,
+  'sw_it_':1.0,
+
   # Ion Valences */
   'zna_' : 1,  # Na valence */
   'zk_' : 1,   # K valence */

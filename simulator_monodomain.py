@@ -136,6 +136,7 @@ class MonodomainSimulator(object):
         fiber_angle = np.ones((N_all),dtype=np.float64)*0
 
         sw_it = cells.get_param('sw_it')
+        thickness = cells.get_param('thickness')
 
         vmem = vmem*(sw_it==1) + np.ones_like(vmem)*(sw_it==0)*(-86.24)
 
@@ -162,7 +163,7 @@ class MonodomainSimulator(object):
                 i_ext_e[:] = 0.0
                 flg_st_temp = False
                 for s in stims_ext:
-                    i_ext_e += s.get_current(t)*Sv
+                    i_ext_e += s.get_current(t)*Sv/thickness
                     flg_st_temp = flg_st_temp or s.get_flag(t)
                 
                 array_mem = np.zeros(im_h*im_w)
@@ -180,11 +181,11 @@ class MonodomainSimulator(object):
                 i_ion = cells.get_param('it')
 
                 # step.3 vmem
-                rhs_vmem = pde_i.forward(vmem)
+                rhs_vmem = pde_i.forward(vmem) / thickness
                 rhs_vmem += i_ext_i
                 rhs_vmem += sigma_mu * i_ext_e
                 rhs_vmem *= 1 / (1+sigma_mu)
-                rhs_vmem -= i_ion * Sv
+                rhs_vmem -= i_ion * Sv / thickness
                 rhs_vmem *= 1 / (Cm * Sv)
                 vmem += dt * rhs_vmem * sw_it
 
