@@ -137,7 +137,7 @@ _ito = _gito*ato*ato*ato*iito*(_v-({erevto_}));
 _inaca = 1750*(exp({gammas_}*{frdy_}*_v/({R_}*{temp_}))*nai*nai*nai*{cao_}-exp(({gammas_}-1)*{frdy_}*_v/({R_}*{temp_}))*{nao_}*{nao_}*{nao_}*cai)/((pow({kmnancx_},3.0)+pow({nao_},3.0))*({kmcancx_}+{cao_})*(1+{ksatncx_}*exp(({gammas_}-1)*{frdy_}*_v/({R_}*{temp_}))));
 _inak = {ibarnak_}*_fnak*(1/(1+pow(({kmnai_}/nai),1.5)))*({ko_}/({ko_}+{kmko_}))*APD_change_inak;
 _inab = _gnab*(_v-_ena)*APD_change_inab;
-_it = st+_naiont+_kiont+_caiont;
+_it = sw_it*(st+_naiont+_kiont+_caiont);
 
 //void conc_nsr ()
 double _kleak = {iupbar_}/{nsrbar_};
@@ -193,3 +193,5 @@ _APD_change_inab=APD_change_inab;
 _APD_change_ina=APD_change_ina;
 _APD_change_ilca=APD_change_ilca;
 _APD_change_ikur=APD_change_ikur;
+_thickness=thickness;
+_sw_it=sw_it;

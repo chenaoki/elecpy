@@ -65,6 +65,8 @@ class model(cellmodel):
             'APD_change_ina',
             'APD_change_ikur',
             'APD_change_ilca',
+            'thickness',
+            'sw_it',
         ]
         self.create()
         path = os.path.dirname(__file__)

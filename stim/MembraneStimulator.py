@@ -51,8 +51,8 @@ class MembraneStimulator(Stimulator):
         assert width > 0 and width < self.shape[0]
         self._map_on[-width:,:] = self.amplitude
 
-    def set_point( self, y, x, rad ):
-        assert x >= rad and x + rad <= self.shape[0]
-        assert y >= rad and y + rad <= self.shape[1]
-        self._map_on[x-rad:x+rad,y-rad:y+rad] = self.amplitude
+    def set_point( self, size_array ):
+        assert size_array[1] >= size_array[2] and size_array[1] + size_array[2] <= self.shape[0]
+        assert size_array[0] >= size_array[2] and size_array[0] + size_array[2] <= self.shape[1]
+        self._map_on[size_array[1]-size_array[2]:size_array[1]+size_array[2],size_array[0]-size_array[2]:size_array[0]+size_array[2]] = self.amplitude
     
