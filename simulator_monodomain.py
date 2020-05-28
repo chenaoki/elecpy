@@ -132,7 +132,11 @@ class MonodomainSimulator(object):
         N_all = (im_h+2)*(im_w+2)
         sigma_l_i_array = np.ones((N_all),dtype=np.float64)*sigma_l_i
         sigma_t_i_array = np.ones((N_all),dtype=np.float64)*sigma_t_i
-        fiber_angle = np.ones((N_all),dtype=np.float64)*0
+        if 'fiber' in sim_params.keys():
+            fiber_param = sim_params['fiber']
+            fiber_angle = np.load(fiber_param).flatten()
+        else:
+            fiber_angle = np.ones((N_all),dtype=np.float64)*0
 
         sw_it = cells.get_param('sw_it')
         thickness = cells.get_param('thickness')
