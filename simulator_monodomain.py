@@ -45,7 +45,10 @@ class MonodomainSimulator(object):
 
         #print("elecpy simulation start!")
 
-        cuda.get_device(0).use()
+        if 'gpu_id' in sim_params.keys():
+            cuda.get_device(sim_params['gpu_id']).use()
+        else:
+            cuda.get_device(0).use()
 
         # Constants
         Sv           = 1400                  # Surface-to-volume ratio (cm^-1)
