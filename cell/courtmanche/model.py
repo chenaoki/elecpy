@@ -1,7 +1,7 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from cellmodel import cellmodel
-from const import const_d
+from .const import const_d
 
 class model(cellmodel):
 
