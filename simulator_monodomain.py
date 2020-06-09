@@ -182,7 +182,7 @@ class MonodomainSimulator(object):
 
                 # step.1 cell state transition
                 cells.set_param('dt', dt / cycle_num)
-                cells.set_param('v', cuda.to_gpu(vmem) )
+                cells.set_param('v', cuda.to_gpu(vmem, device=sim_params['gpu_id']) )
                 for i in range(int(cycle_num)):
                     cells.update()
                 i_ion = cells.get_param('it')
